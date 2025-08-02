@@ -1,0 +1,129 @@
+/* Habits Grid */
+.habits-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 1.5rem;
+    margin-top: 1rem;
+}
+
+.habit-card {
+    background: rgba(255, 255, 255, 0.25);
+    backdrop-filter: blur(10px);
+    padding: 1.5rem;
+    border-radius: 16px;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    transition: transform 0.2s ease;
+}
+
+.habit-card:hover {
+    transform: translateY(-5px);
+}
+
+/* Habit Form */
+.habit-form {
+    width: 100%;
+}
+
+.form-row {
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+}
+
+.form-input {
+    padding: 0.75rem 1rem;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.2);
+    color: #333;
+    font-size: 14px;
+    flex: 1;
+}
+
+.form-input:focus {
+    outline: none;
+    border-color: var(--lavender-medium);
+}
+
+/* Habit Filters */
+.habit-filters {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.custom-button {
+    padding: 0.5rem 1rem;
+    border: 1px solid var(--lavender-medium);
+    background: transparent;
+    color: #333;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.custom-button:hover,
+.custom-button.active {
+    background: var(--lavender-medium);
+    color: white;
+}
+
+/* Habit Card Content */
+.habit-title {
+    font-size: 18px;
+    font-weight: 600;
+    color: #333;
+    margin-bottom: 0.5rem;
+}
+
+.habit-meta {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+}
+
+.habit-frequency {
+    font-size: 12px;
+    padding: 4px 8px;
+    border-radius: 4px;
+    background: var(--lavender-medium);
+    color: white;
+}
+
+.habit-streak {
+    font-size: 14px;
+    color: #666;
+}
+
+.habit-actions {
+    display: flex;
+    justify-content: space-between;
+    gap: 0.5rem;
+}
+
+.habit-button {
+    padding: 0.5rem 1rem;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-size: 14px;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.complete-button {
+    background: var(--health-color);
+    color: white;
+}
+
+.delete-button {
+    background: #ef4444;
+    color: white;
+}
+
+.habit-button:hover {
+    opacity: 0.9;
+    transform: translateY(-2px);
+}

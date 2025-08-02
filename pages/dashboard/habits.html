@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Your Habits - HabitHub</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../../assets/css/dashboard.css">
+    <link rel="stylesheet" href="../../assets/css/habits.css">
+    <link rel="icon" href="../../assets/img/HabitHub-logo.png">
+<body>
+    <div class="dashboard-container">
+        <!-- Sidebar -->
+        <div class="sidebar">
+            <div class="logo">
+                <img src="../../assets/img/HabitHub-logo.png" alt="HabitHub Logo" class="logo-img" style="height: 40px;">
+                <h2>HabitHub</h2>
+            </div>
+            <div class="nav-links">
+                <a href="dashboard.html">
+                    <i class="fas fa-home"></i>
+                    Dashboard
+                </a>
+                <a href="habits.html" class="active">
+                    <i class="fas fa-list-check"></i>
+                    Your Habits
+                </a>
+                <a href="challenges.html">
+                    <i class="fas fa-trophy"></i>
+                    Challenges
+                </a>
+                <a href="calender.html">
+                    <i class="fas fa-calendar"></i>
+                    Calendar
+                </a>
+                <a href="profile.html">
+                    <i class="fas fa-user"></i>
+                    Profile
+                </a>
+            </div>
+            <button class="logout-btn" onclick="logout()">
+                <i class="fas fa-sign-out-alt"></i>
+                Logout
+            </button>
+        </div>
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <!-- Greetings Section -->
+            <div class="greeting-section">
+                <div class="greeting-text">
+                    <h1>Hello, <span id="user-name">User</span>!</h1>
+                    <p id="greeting-message">Let's manage your habits</p>
+                </div>
+                <div class="date-time">
+                    <p id="current-date"></p>
+                    <p id="current-time"></p>
+                </div>
+            </div>
+
+            <!-- Main Habits Content -->
+            <div class="content-section">
+                <!-- Add Habit Section -->
+                <div class="card mb-4">
+                    <div class="card-body">
+                        <h3 class="card-title mb-4">Add New Habit</h3>
+                        <form id="add-habit-form" class="row g-3">
+                            <div class="col-md-6">
+                                <input type="text" class="form-control" id="habit-name" placeholder="Habit name" required>
+                            </div>
+                            <div class="col-md-3">
+                                <select class="form-select" id="habit-frequency" required>
+                                    <option value="">Select frequency</option>
+                                    <option value="daily">Daily</option>
+                                    <option value="weekly">Weekly</option>
+                                    <option value="monthly">Monthly</option>
+                                </select>
+                            </div>
+                            <div class="col-md-3">
+                                <button type="submit" class="btn btn-primary w-100">
+                                    <i class="fas fa-plus"></i> Add Habit
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Current Habits Section -->
+                <div class="card">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center mb-4">
+                            <h3 class="card-title mb-0">Your Habits</h3>
+                            <div class="habit-filters">
+                                <button class="btn btn-outline-primary active" data-filter="all">All</button>
+                                <button class="btn btn-outline-primary" data-filter="daily">Daily</button>
+                                <button class="btn btn-outline-primary" data-filter="weekly">Weekly</button>
+                                <button class="btn btn-outline-primary" data-filter="monthly">Monthly</button>
+                            </div>
+                        </div>
+                        
+                        <div id="habits-grid" class="row g-4">
+                            <!-- Habits will be populated here dynamically -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS and other scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="../../assets/js/main.js"></script>
+    <script src="../../assets/js/habits.js"></script>
+</body>
+</html>

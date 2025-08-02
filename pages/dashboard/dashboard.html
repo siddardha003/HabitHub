@@ -8,8 +8,8 @@
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="../../assets/css/dashboard.css">
   <link rel="icon" href="../../assets/img/HabitHub-logo.png">
+  <link rel="stylesheet" href="../../assets/css/dashboard.css">
 </head>
 
 <body>
@@ -21,9 +21,13 @@
         <h2>HabitHub</h2>
       </div>
       <div class="nav-links">
-        <a href="#" class="active">
+        <a href="dashboard.html" class="active">
           <i class="fas fa-home"></i>
           Dashboard
+        </a>
+        <a href="habits.html">
+          <i class="fas fa-list-check"></i>
+          Your Habits
         </a>
         <a href="#">
           <i class="fas fa-eye"></i>
@@ -49,7 +53,7 @@
           <i class="fas fa-cog"></i>
           Settings
         </a>
-        <a href="#">
+        <a href="#" onclick="handleLogout(event)">
           <i class="fas fa-sign-out-alt"></i>
           Logout
         </a>
@@ -61,7 +65,7 @@
       <!-- Header -->
       <div class="dashboard-header">
         <div class="greeting-section">
-          <h1 id="greeting">Good Morning, Alex!</h1>
+          <h1 id="greeting">Loading...</h1>
           <div class="date" id="currentDate"></div>
         </div>
         <div class="header-icons">
@@ -73,13 +77,26 @@
       </div>
 
       <!-- Stats Section -->
+      <style>
+        @keyframes bounce {
+          0%, 100% { transform: scale(1); }
+          50% { transform: scale(1.2); }
+        }
+        
+        @keyframes bounceIn {
+          0% { transform: scale(0.3); opacity: 0; }
+          50% { transform: scale(1.05); opacity: 0.8; }
+          70% { transform: scale(0.9); opacity: 0.9; }
+          100% { transform: scale(1); opacity: 1; }
+        }
+      </style>
       <div class="stats-section">
         <div class="stat-card">
           <h3>5</h3>
           <p>Active Habits</p>
         </div>
         <div class="stat-card">
-          <h3>12</h3>
+          <h3>0</h3>
           <p>Current Streak</p>
         </div>
         <div class="stat-card">
@@ -87,8 +104,8 @@
           <p>Weekly Progress</p>
         </div>
         <div class="stat-card">
-          <h3>🏆</h3>
-          <p>Level 5 Achiever</p>
+          <h3>�</h3>
+          <p>Achievement Level</p>
         </div>
       </div>
 
@@ -96,288 +113,53 @@
       <div class="habits-section">
         <div class="section-header">
           <h2>Today's Habits</h2>
-          <button class="add-habit-btn">
+          <button class="add-habit-btn" onclick="openAddHabitModal()">
             <i class="fas fa-plus"></i>
             Add New Habit
           </button>
         </div>
 
-        <div class="habits-grid">
-          <!-- Habit Card 1 - Health -->
-          <div class="habit-card health">
-            <div class="habit-header">
-              <div class="habit-title">
-                <div class="habit-icon">
-                  <i class="fas fa-tint"></i>
-                </div>
-                <div>
-                  <h4>Drink Water</h4>
-                  <span>Health</span>
-                </div>
+        <!-- Add Habit Modal -->
+        <div class="modal fade" id="addHabitModal" tabindex="-1" aria-labelledby="addHabitModalLabel" aria-hidden="true">
+          <div class="modal-dialog">
+            <div class="modal-content">
+              <div class="modal-header">
+                <h5 class="modal-title" id="addHabitModalLabel">Add New Habit</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
               </div>
-              <div class="streak-badge">
-                <i class="fas fa-fire"></i>
-                7 days
+              <div class="modal-body">
+                <form id="addHabitForm">
+                  <div class="mb-3">
+                    <label for="habitName" class="form-label">Habit Name</label>
+                    <input type="text" class="form-control" id="habitName" required
+                      placeholder="Enter habit name (e.g., Reading, Exercise)">
+                  </div>
+                  <div class="mb-3">
+                    <label for="habitCategory" class="form-label">Category</label>
+                    <select class="form-select" id="habitCategory" required>
+                      <option value="" disabled selected>Select a category</option>
+                      <option value="health">🟢 Health</option>
+                      <option value="physical">🟠 Physical Activities</option>
+                      <option value="learning">🔵 Learning</option>
+                      <option value="mindfulness">🟣 Mindfulness</option>
+                      <option value="creativity">🩷 Creativity</option>
+                      <option value="productivity">🟢 Productivity</option>
+                      <option value="social">🟠 Social</option>
+                      <option value="lifestyle">🟡 Lifestyle</option>
+                    </select>
+                  </div>
+                </form>
               </div>
-            </div>
-            <div class="week-progress">
-              <div class="week-days">
-                <div>
-                  <div class="day-label">S</div>
-                  <div class="day-check completed">
-                    <i class="fas fa-check"></i>
-                  </div>
-                </div>
-                <div>
-                  <div class="day-label">M</div>
-                  <div class="day-check completed">
-                    <i class="fas fa-check"></i>
-                  </div>
-                </div>
-                <div>
-                  <div class="day-label">T</div>
-                  <div class="day-check completed">
-                    <i class="fas fa-check"></i>
-                  </div>
-                </div>
-                <div>
-                  <div class="day-label">W</div>
-                  <div class="day-check today" onclick="toggleHabit(this)">
-                    <i class="fas fa-check" style="display: none;"></i>
-                  </div>
-                </div>
-                <div>
-                  <div class="day-label">T</div>
-                  <div class="day-check">
-                    <i class="fas fa-check" style="display: none;"></i>
-                  </div>
-                </div>
-                <div>
-                  <div class="day-label">F</div>
-                  <div class="day-check">
-                    <i class="fas fa-check" style="display: none;"></i>
-                  </div>
-                </div>
-                <div>
-                  <div class="day-label">S</div>
-                  <div class="day-check">
-                    <i class="fas fa-check" style="display: none;"></i>
-                  </div>
-                </div>
+              <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" onclick="addNewHabit()">Add Habit</button>
               </div>
-            </div>
-            <div class="progress-section">
-              <span class="completion-rate">3/7 completed</span>
-              <span>43% this week</span>
             </div>
           </div>
+        </div>
 
-          <!-- Habit Card 2 - Learning -->
-          <div class="habit-card learning">
-            <div class="habit-header">
-              <div class="habit-title">
-                <div class="habit-icon">
-                  <i class="fas fa-book"></i>
-                </div>
-                <div>
-                  <h4>Read 30 Minutes</h4>
-                  <span>Learning</span>
-                </div>
-              </div>
-              <div class="streak-badge">
-                <i class="fas fa-fire"></i>
-                3 days
-              </div>
-            </div>
-            <div class="week-progress">
-              <div class="week-days">
-                <div>
-                  <div class="day-label">S</div>
-                  <div class="day-check">
-                    <i class="fas fa-check" style="display: none;"></i>
-                  </div>
-                </div>
-                <div>
-                  <div class="day-label">M</div>
-                  <div class="day-check completed">
-                    <i class="fas fa-check"></i>
-                  </div>
-                </div>
-                <div>
-                  <div class="day-label">T</div>
-                  <div class="day-check completed">
-                    <i class="fas fa-check"></i>
-                  </div>
-                </div>
-                <div>
-                  <div class="day-label">W</div>
-                  <div class="day-check today completed">
-                    <i class="fas fa-check"></i>
-                  </div>
-                </div>
-                <div>
-                  <div class="day-label">T</div>
-                  <div class="day-check">
-                    <i class="fas fa-check" style="display: none;"></i>
-                  </div>
-                </div>
-                <div>
-                  <div class="day-label">F</div>
-                  <div class="day-check">
-                    <i class="fas fa-check" style="display: none;"></i>
-                  </div>
-                </div>
-                <div>
-                  <div class="day-label">S</div>
-                  <div class="day-check">
-                    <i class="fas fa-check" style="display: none;"></i>
-                  </div>
-                </div>
-              </div>
-            </div>
-            <div class="progress-section">
-              <span class="completion-rate">3/7 completed</span>
-              <span>43% this week</span>
-            </div>
-          </div>
-
-          <!-- Habit Card 3 - Lifestyle -->
-          <div class="habit-card lifestyle">
-            <div class="habit-header">
-              <div class="habit-title">
-                <div class="habit-icon">
-                  <i class="fas fa-dumbbell"></i>
-                </div>
-                <div>
-                  <h4>Exercise</h4>
-                  <span>Lifestyle</span>
-                </div>
-              </div>
-              <div class="streak-badge">
-                <i class="fas fa-fire"></i>
-                5 days
-              </div>
-            </div>
-            <div class="week-progress">
-              <div class="week-days">
-                <div>
-                  <div class="day-label">S</div>
-                  <div class="day-check completed">
-                    <i class="fas fa-check"></i>
-                  </div>
-                </div>
-                <div>
-                  <div class="day-label">M</div>
-                  <div class="day-check completed">
-                    <i class="fas fa-check"></i>
-                  </div>
-                </div>
-                <div>
-                  <div class="day-label">T</div>
-                  <div class="day-check">
-                    <i class="fas fa-check" style="display: none;"></i>
-                  </div>
-                </div>
-                <div>
-                  <div class="day-label">W</div>
-                  <div class="day-check today" onclick="toggleHabit(this)">
-                    <i class="fas fa-check" style="display: none;"></i>
-                  </div>
-                </div>
-                <div>
-                  <div class="day-label">T</div>
-                  <div class="day-check">
-                    <i class="fas fa-check" style="display: none;"></i>
-                  </div>
-                </div>
-                <div>
-                  <div class="day-label">F</div>
-                  <div class="day-check">
-                    <i class="fas fa-check" style="display: none;"></i>
-                  </div>
-                </div>
-                <div>
-                  <div class="day-label">S</div>
-                  <div class="day-check">
-                    <i class="fas fa-check" style="display: none;"></i>
-                  </div>
-                </div>
-              </div>
-            </div>
-            <div class="progress-section">
-              <span class="completion-rate">2/7 completed</span>
-              <span>29% this week</span>
-            </div>
-          </div>
-
-          <!-- Habit Card 4 - Mindfulness -->
-          <div class="habit-card mindfulness">
-            <div class="habit-header">
-              <div class="habit-title">
-                <div class="habit-icon">
-                  <i class="fas fa-leaf"></i>
-                </div>
-                <div>
-                  <h4>Meditation</h4>
-                  <span>Mindfulness</span>
-                </div>
-              </div>
-              <div class="streak-badge">
-                <i class="fas fa-fire"></i>
-                1 day
-              </div>
-            </div>
-            <div class="week-progress">
-              <div class="week-days">
-                <div>
-                  <div class="day-label">S</div>
-                  <div class="day-check">
-                    <i class="fas fa-check" style="display: none;"></i>
-                  </div>
-                </div>
-                <div>
-                  <div class="day-label">M</div>
-                  <div class="day-check">
-                    <i class="fas fa-check" style="display: none;"></i>
-                  </div>
-                </div>
-                <div>
-                  <div class="day-label">T</div>
-                  <div class="day-check completed">
-                    <i class="fas fa-check"></i>
-                  </div>
-                </div>
-                <div>
-                  <div class="day-label">W</div>
-                  <div class="day-check today" onclick="toggleHabit(this)">
-                    <i class="fas fa-check" style="display: none;"></i>
-                  </div>
-                </div>
-                <div>
-                  <div class="day-label">T</div>
-                  <div class="day-check">
-                    <i class="fas fa-check" style="display: none;"></i>
-                  </div>
-                </div>
-                <div>
-                  <div class="day-label">F</div>
-                  <div class="day-check">
-                    <i class="fas fa-check" style="display: none;"></i>
-                  </div>
-                </div>
-                <div>
-                  <div class="day-label">S</div>
-                  <div class="day-check">
-                    <i class="fas fa-check" style="display: none;"></i>
-                  </div>
-                </div>
-              </div>
-            </div>
-            <div class="progress-section">
-              <span class="completion-rate">1/7 completed</span>
-              <span>14% this week</span>
-            </div>
-          </div>
+        <div class="habits-grid" id="habitsGrid">
+          <!-- Dynamic habits will be rendered here -->
         </div>
       </div>
     </div>
@@ -385,22 +167,111 @@
 
   <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
   <script>
-    // Dynamic greeting based on time
-    function updateGreeting() {
-      const now = new Date();
-      const hour = now.getHours();
-      const userName = "Alex"; // This would come from your backend/session
-
-      let greeting;
-      if (hour < 12) {
-        greeting = `Good Morning, ${userName}!`;
-      } else if (hour < 18) {
-        greeting = `Good Afternoon, ${userName}!`;
-      } else {
-        greeting = `Good Evening, ${userName}!`;
+    // Static habits data
+    const habits = [
+      {
+        id: 1,
+        name: 'Drink Water',
+        category: 'health',
+        icon: 'fa-tint',
+        currentStreak: 7,
+        weekProgress: [true, true, true, false, false, false, false], // Sun to Sat
+        completedDays: 3,
+        lastCompletedDate: new Date().toDateString() // Track the last completion date
+      },
+      {
+        id: 2,
+        name: 'Read 30 Minutes',
+        category: 'learning',
+        icon: 'fa-book',
+        currentStreak: 3,
+        weekProgress: [false, true, true, true, false, false, false],
+        completedDays: 3,
+      },
+      {
+        id: 3,
+        name: 'Exercise',
+        category: 'lifestyle',
+        icon: 'fa-dumbbell',
+        currentStreak: 5,
+        weekProgress: [true, true, false, false, false, false, false],
+        completedDays: 2,
+      },
+      {
+        id: 4,
+        name: 'Meditation',
+        category: 'mindfulness',
+        icon: 'fa-leaf',
+        currentStreak: 1,
+        weekProgress: [false, false, true, false, false, false, false],
+        completedDays: 1,
       }
+    ];
 
-      document.getElementById('greeting').textContent = greeting;
+    // Category icons and colors mapping
+    const categoryIcons = {
+      health: 'fa-heart',
+      physical: 'fa-dumbbell',
+      learning: 'fa-book',
+      mindfulness: 'fa-leaf',
+      creativity: 'fa-paint-brush',
+      productivity: 'fa-tasks',
+      social: 'fa-users',
+      lifestyle: 'fa-home'
+    };
+
+    // Dynamic greeting based on time
+    async function updateGreeting() {
+      try {
+        const response = await fetch('../../includes/get_user_data.php');
+        const text = await response.text();
+        
+        let data;
+        try {
+          data = JSON.parse(text);
+        } catch (e) {
+          console.error('Server response:', text);
+          throw new Error('Invalid server response');
+        }
+        
+        if (!data.success) {
+          throw new Error(data.message || 'Failed to fetch user data');
+        }
+
+        const now = new Date();
+        const hour = now.getHours();
+        const userName = data.user.name;
+
+        let greeting;
+        if (hour < 12) {
+          greeting = `Good Morning, ${userName}!`;
+        } else if (hour < 18) {
+          greeting = `Good Afternoon, ${userName}!`;
+        } else {
+          greeting = `Good Evening, ${userName}!`;
+        }
+
+        document.getElementById('greeting').textContent = greeting;
+
+        const profileIcon = document.querySelector('.profile-icon');
+        if (profileIcon) {
+          profileIcon.textContent = userName.charAt(0).toUpperCase();
+        }
+      } catch (error) {
+        console.error('Error updating greeting:', error);
+        const hour = new Date().getHours();
+        let greeting = 'Good ';
+        if (hour < 12) greeting += 'Morning';
+        else if (hour < 18) greeting += 'Afternoon';
+        else greeting += 'Evening';
+        
+        document.getElementById('greeting').textContent = `${greeting}, Guest!`;
+        
+        const profileIcon = document.querySelector('.profile-icon');
+        if (profileIcon) {
+          profileIcon.textContent = 'G';
+        }
+      }
     }
 
     // Update current date
@@ -418,97 +289,429 @@
     // Toggle habit completion
     function toggleHabit(element) {
       const checkIcon = element.querySelector('.fas.fa-check');
+      const habitCard = element.closest('.habit-card');
+      const habitName = habitCard.querySelector('h4').textContent;
+      const habit = habits.find(h => h.name === habitName);
+      const today = new Date().getDay();
 
       if (element.classList.contains('completed')) {
-        // Mark as incomplete
         element.classList.remove('completed');
         checkIcon.style.display = 'none';
-
-        // Play sound effect (optional)
+        habit.weekProgress[today] = false;
+        habit.completedDays--;
+        habit.lastCompletedDate = null;
+        
         playSound('incomplete');
       } else {
-        // Mark as complete
         element.classList.add('completed');
         checkIcon.style.display = 'block';
+        habit.weekProgress[today] = true;
+        habit.completedDays++;
+        habit.lastCompletedDate = new Date().toDateString();
 
-        // Add subtle animation
         element.style.transform = 'scale(1.2)';
         setTimeout(() => {
           element.style.transform = 'scale(1)';
         }, 200);
 
-        // Play success sound (optional)
+        // Check if this completion results in all habits being completed
+        const allCompleted = habits.every(h => h.weekProgress[today]);
+        if (allCompleted) {
+          showStreakAnimation();
+        }
+
         playSound('complete');
       }
 
-      // Update progress (you would sync this with backend)
-      updateHabitProgress(element);
+      updateHabitProgress(habitCard, habit);
+      updateStats();
     }
 
     // Play sound effects
     function playSound(type) {
-      // You can add actual sound files here
       if (type === 'complete') {
-        // Play completion sound
         console.log('Playing completion sound');
       } else {
-        // Play incomplete sound
         console.log('Playing incomplete sound');
       }
     }
 
-    // Update habit progress
-    function updateHabitProgress(element) {
-      const habitCard = element.closest('.habit-card');
-      const completedDays = habitCard.querySelectorAll('.day-check.completed').length;
-      const totalDays = habitCard.querySelectorAll('.day-check').length;
-      const percentage = Math.round((completedDays / totalDays) * 100);
+    // Show streak animation when all habits are completed
+    function showStreakAnimation() {
+      const stats = getStoredStats();
+      const streakCard = document.querySelectorAll('.stat-card')[1];
+      
+      // Create and show the streak celebration overlay
+      const overlay = document.createElement('div');
+      overlay.style.cssText = `
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.7);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        z-index: 1000;
+      `;
+      
+      const message = document.createElement('div');
+      message.style.cssText = `
+        background: white;
+        padding: 2rem;
+        border-radius: 1rem;
+        text-align: center;
+        animation: bounceIn 0.5s;
+        max-width: 90%;
+        width: 400px;
+      `;
 
+      // Get current achievement level
+      const currentAchievement = calculateAchievementLevel(stats.currentStreak);
+      const nextAchievement = getNextAchievement(stats.currentStreak);
+      
+      const streakText = stats.currentStreak > 1 ? 
+        `🔥 ${stats.currentStreak} Day Win Streak! 🔥` :
+        `🎉 Streak Started! 🎉`;
+      
+      let achievementProgress = '';
+      if (nextAchievement) {
+        const daysToNext = nextAchievement.days - stats.currentStreak;
+        achievementProgress = `
+          <div style="margin-top: 1rem; padding-top: 1rem; border-top: 1px solid #eee;">
+            <p style="color: #666;">Current Level: ${currentAchievement.name}</p>
+            <p style="color: #666;">Next Achievement: ${nextAchievement.name}</p>
+            <p style="color: #666;">${daysToNext} days to go!</p>
+            <div style="background: #eee; height: 8px; border-radius: 4px; margin-top: 0.5rem;">
+              <div style="background: ${currentAchievement.color}; width: ${(stats.currentStreak / nextAchievement.days) * 100}%; height: 100%; border-radius: 4px; transition: width 0.3s ease;"></div>
+            </div>
+          </div>
+        `;
+      }
+      
+      message.innerHTML = `
+        <h2>${streakText}</h2>
+        <p>Amazing! You've completed all habits today!</p>
+        ${stats.currentStreak > 0 ? `<p>Keep going! You're on fire! 🔥</p>` : ''}
+        ${achievementProgress}
+      `;
+      
+      overlay.appendChild(message);
+      document.body.appendChild(overlay);
+      
+      // Add bounce animation to streak number in stats
+      streakCard.style.animation = 'bounce 0.5s';
+      
+      // Remove overlay after 5 seconds (increased from 3 to show achievement progress)
+      setTimeout(() => {
+        overlay.style.opacity = '0';
+        overlay.style.transition = 'opacity 0.5s';
+        setTimeout(() => {
+          document.body.removeChild(overlay);
+          streakCard.style.animation = '';
+        }, 500);
+      }, 5000);
+    }
+
+    // Get next achievement milestone
+    function getNextAchievement(currentStreak) {
+      const milestones = [
+        { days: 3, name: "Star" },
+        { days: 5, name: "Superstar" },
+        { days: 7, name: "Champion" },
+        { days: 50, name: "Hall of Fame" },
+        { days: 100, name: "Invincible" },
+        { days: 150, name: "Legend" },
+        { days: 200, name: "Golden" },
+        { days: 250, name: "Visionary" },
+        { days: 300, name: "Supreme" },
+        { days: 365, name: "Interstellar" },
+        { days: 500, name: "Galactic" }
+      ];
+      
+      for (const milestone of milestones) {
+        if (currentStreak < milestone.days) {
+          return milestone;
+        }
+      }
+      return null; // No next achievement (reached maximum)
+    }
+    
+
+    // Update streak
+    function updateStreak(habit) {
+      const today = new Date().getDay();
+      let streak = 0;
+      
+      for (let i = today; i >= 0; i--) {
+        if (habit.weekProgress[i]) {
+          streak++;
+        } else {
+          break;
+        }
+      }
+      
+      if (habit.weekProgress[today]) {
+        for (let i = 6; i > today; i--) {
+          if (habit.weekProgress[i]) {
+            streak++;
+          } else {
+            break;
+          }
+        }
+      }
+      
+      habit.currentStreak = streak;
+    }
+
+    // Update habit progress
+    function updateHabitProgress(habitCard, habit) {
+      const percentage = Math.round((habit.completedDays / 7) * 100);
       const progressSection = habitCard.querySelector('.progress-section');
       const completionRate = progressSection.querySelector('.completion-rate');
       const weekProgress = progressSection.children[1];
 
-      completionRate.textContent = `${completedDays}/${totalDays} completed`;
+      completionRate.textContent = `${habit.completedDays}/7 completed`;
       weekProgress.textContent = `${percentage}% this week`;
+
+      // Update streak badge
+      const streakBadge = habitCard.querySelector('.streak-badge');
+      streakBadge.innerHTML = `<i class="fas fa-fire"></i> ${habit.currentStreak} days`;
     }
 
-    // Add click listeners to all day checks
-    document.addEventListener('DOMContentLoaded', function () {
-      updateGreeting();
-      updateDate();
+    // Get stored stats from localStorage
+    function getStoredStats() {
+      const stored = localStorage.getItem('habitStats');
+      return stored ? JSON.parse(stored) : {
+        currentStreak: 0,
+        bestStreak: 0,
+        lastCompletedDate: null,
+        achievementLevel: 1
+      };
+    }
 
-      // Add click listeners to all non-completed day checks
-      const dayChecks = document.querySelectorAll('.day-check:not(.completed)');
-      dayChecks.forEach(dayCheck => {
-        if (!dayCheck.onclick) {
-          dayCheck.onclick = function () {
-            toggleHabit(this);
-          };
+    // Save stats to localStorage
+    function saveStats(stats) {
+      localStorage.setItem('habitStats', JSON.stringify(stats));
+    }
+
+    const achievementLevels = [
+      { days: 0, name: "Beginner", icon: "fa-seedling", color: "#9ca3af" },
+      { days: 3, name: "Star", icon: "fa-star", color: "#f59e0b" },
+      { days: 5, name: "Superstar", icon: "fa-stars", color: "#8b5cf6" },
+      { days: 7, name: "Champion", icon: "fa-trophy", color: "#6366f1" },
+      { days: 50, name: "Hall of Fame", icon: "fa-medal", color: "#f59e0b" },
+      { days: 100, name: "Invincible", icon: "fa-shield-halved", color: "#06b6d4" },
+      { days: 150, name: "Legend", icon: "fa-crown", color: "#84cc16" },
+      { days: 200, name: "Golden", icon: "fa-award", color: "#eab308" },
+      { days: 250, name: "Visionary", icon: "fa-eye", color: "#14b8a6" },
+      { days: 300, name: "Supreme", icon: "fa-gem", color: "#ec4899" },
+      { days: 365, name: "Interstellar", icon: "fa-planet-ringed", color: "#8b5cf6" },
+      { days: 500, name: "Galactic", icon: "fa-galaxy", color: "#6366f1" }
+    ];
+
+    // Calculate achievement level based on best streak
+    function calculateAchievementLevel(streak) {
+      // Find the highest achievement level that the user qualifies for
+      for (let i = achievementLevels.length - 1; i >= 0; i--) {
+        if (streak >= achievementLevels[i].days) {
+          return achievementLevels[i];
         }
-      });
-    });
-
-    // Mobile sidebar toggle (for responsive design)
-    function toggleSidebar() {
-      const sidebar = document.querySelector('.sidebar');
-      sidebar.classList.toggle('open');
+      }
+      return achievementLevels[0];
     }
+
+    function getNextAchievement(streak) {
+      // Find the next achievement level that the user hasn't reached yet
+      for (let i = 0; i < achievementLevels.length; i++) {
+        if (streak < achievementLevels[i].days) {
+          return achievementLevels[i];
+        }
+      }
+      return null; // Return null if user has reached the highest level
+    }
+    
 
     // Update stats dynamically
     function updateStats() {
-      // This would typically fetch data from your backend
+      const today = new Date().toDateString();
+      let storedStats = getStoredStats();
+      
+      // Check if all habits are completed for today
+      const allHabitsCompleted = habits.every(habit => {
+        const today = new Date().getDay();
+        return habit.weekProgress[today];
+      });
+
+      // Update streak logic
+      if (allHabitsCompleted) {
+        if (storedStats.lastCompletedDate) {
+          // Check if the last completion was yesterday
+          const lastDate = new Date(storedStats.lastCompletedDate);
+          const yesterday = new Date();
+          yesterday.setDate(yesterday.getDate() - 1);
+          
+          if (lastDate.toDateString() === yesterday.toDateString()) {
+            // Streak continues
+            storedStats.currentStreak++;
+          } else if (lastDate.toDateString() !== today) {
+            // Not consecutive, reset streak
+            storedStats.currentStreak = 1;
+          }
+        } else {
+          // First completion
+          storedStats.currentStreak = 1;
+        }
+        storedStats.lastCompletedDate = today;
+      } else if (storedStats.lastCompletedDate !== today) {
+        // If not all habits completed and it's a new day, reset streak
+        storedStats.currentStreak = 0;
+      }
+
+      // Update best streak if current is higher
+      if (storedStats.currentStreak > storedStats.bestStreak) {
+        storedStats.bestStreak = storedStats.currentStreak;
+      }
+
       const stats = {
-        activeHabits: 5,
-        currentStreak: 12,
-        weeklyProgress: 78,
-        level: 5
+        activeHabits: habits.length,
+        currentStreak: storedStats.currentStreak,
+        weeklyProgress: Math.round(habits.reduce((acc, h) => acc + (h.completedDays / 7), 0) / habits.length * 100),
+        achievementLevel: calculateAchievementLevel(storedStats.bestStreak)
       };
 
+      // Save updated stats
+      saveStats(storedStats);
+
+      // Update UI
       const statCards = document.querySelectorAll('.stat-card h3');
       statCards[0].textContent = stats.activeHabits;
       statCards[1].textContent = stats.currentStreak;
       statCards[2].textContent = stats.weeklyProgress + '%';
-      statCards[3].textContent = '🏆';
+      
+      // Update achievement level with Font Awesome icon
+      const achievement = stats.achievementLevel;
+      statCards[3].innerHTML = `
+        <i class="fas ${achievement.icon}" style="color: ${achievement.color}; font-size: 28px;"></i>
+      `;
+      const achievementCard = statCards[3].closest('.stat-card');
+      achievementCard.querySelector('p').textContent = achievement.name;
+
+      // Add tooltip with achievement info
+      const nextLevel = getNextAchievement(storedStats.currentStreak);
+      if (nextLevel) {
+        const daysToNext = nextLevel.days - storedStats.currentStreak;
+        achievementCard.title = `${achievement.name} - Next: ${nextLevel.name} in ${daysToNext} days`;
+      } else {
+        achievementCard.title = `${achievement.name} - Maximum level achieved!`;
+      }
+      
+      // Add tooltip with achievement info
+      const nextAchievement = getNextAchievement(storedStats.currentStreak);
+      if (nextAchievement) {
+        const daysToNext = nextAchievement.days - storedStats.currentStreak;
+        achievementCard.title = `${achievement.name} - Next: ${nextAchievement.name} (${daysToNext} days to go)`;
+      } else {
+        achievementCard.title = `${achievement.name} - Maximum level achieved!`;
+      }
+    }
+
+    // Render habits
+    function renderHabits() {
+      const habitsGrid = document.getElementById('habitsGrid');
+      habitsGrid.innerHTML = '';
+
+      habits.forEach(habit => {
+        const today = new Date().getDay();
+        const weekDays = ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
+        
+        let weekProgressHTML = '';
+        habit.weekProgress.forEach((completed, index) => {
+          const isToday = index === today;
+          const completedClass = completed ? 'completed' : '';
+          const todayClass = isToday ? 'today' : '';
+          
+          weekProgressHTML += `
+            <div>
+              <div class="day-label">${weekDays[index]}</div>
+              <div class="day-check ${completedClass} ${todayClass}" ${isToday ? 'onclick="toggleHabit(this)"' : ''}>
+                <i class="fas fa-check" style="display: ${completed ? 'block' : 'none'};"></i>
+              </div>
+            </div>
+          `;
+        });
+
+        const percentage = Math.round((habit.completedDays / 7) * 100);
+        
+        const habitCard = `
+          <div class="habit-card ${habit.category}">
+            <div class="habit-header">
+              <div class="habit-title">
+                <div class="habit-icon">
+                  <i class="fas ${habit.icon}"></i>
+                </div>
+                <div>
+                  <h4>${habit.name}</h4>
+                  <span>${habit.category.charAt(0).toUpperCase() + habit.category.slice(1)}</span>
+                </div>
+              </div>
+              <div class="streak-badge">
+                <i class="fas fa-fire"></i>
+                ${habit.currentStreak} days
+              </div>
+            </div>
+            <div class="week-progress">
+              <div class="week-days">
+                ${weekProgressHTML}
+              </div>
+            </div>
+            <div class="progress-section">
+              <span class="completion-rate">${habit.completedDays}/7 completed</span>
+              <span>${percentage}% this week</span>
+            </div>
+          </div>
+        `;
+        
+        habitsGrid.innerHTML += habitCard;
+      });
+    }
+
+    // Modal functions
+    function openAddHabitModal() {
+      const modal = new bootstrap.Modal(document.getElementById('addHabitModal'));
+      modal.show();
+    }
+
+    function addNewHabit() {
+      const nameInput = document.getElementById('habitName');
+      const categorySelect = document.getElementById('habitCategory');
+      
+      if (!nameInput.value.trim() || !categorySelect.value) {
+        alert('Please fill in all fields');
+        return;
+      }
+
+      const newHabit = {
+        id: habits.length + 1,
+        name: nameInput.value.trim(),
+        category: categorySelect.value,
+        icon: categoryIcons[categorySelect.value],
+        currentStreak: 0,
+        weekProgress: Array(7).fill(false),
+        completedDays: 0
+      };
+
+      habits.push(newHabit);
+
+      nameInput.value = '';
+      categorySelect.selectedIndex = 0;
+
+      const modal = bootstrap.Modal.getInstance(document.getElementById('addHabitModal'));
+      modal.hide();
+
+      renderHabits();
+      updateStats();
     }
 
     // Daily notification prompt
@@ -519,7 +722,6 @@
       if (lastPrompt !== today) {
         setTimeout(() => {
           if (confirm('🌟 Ready to crush your habits today? Check in now!')) {
-            // Focus on first incomplete habit
             const firstIncomplete = document.querySelector('.day-check.today:not(.completed)');
             if (firstIncomplete) {
               firstIncomplete.scrollIntoView({ behavior: 'smooth' });
@@ -531,33 +733,46 @@
       }
     }
 
+    // Mobile sidebar toggle
+    function toggleSidebar() {
+      const sidebar = document.querySelector('.sidebar');
+      sidebar.classList.toggle('open');
+    }
+
+    // Logout functionality
+    async function handleLogout(event) {
+      event.preventDefault();
+      
+      try {
+        const response = await fetch('../../includes/logout.php');
+        const data = await response.json();
+        
+        if (data.success) {
+          alert('Logged out successfully');
+          window.location.href = '../auth/signin.html';
+        } else {
+          throw new Error(data.message || 'Logout failed');
+        }
+      } catch (error) {
+        console.error('Logout error:', error);
+        alert('Error during logout. Please try again.');
+      }
+    }
+
     // Initialize app
     document.addEventListener('DOMContentLoaded', function () {
       updateGreeting();
       updateDate();
       updateStats();
-
-      // Show daily prompt after 2 seconds
+      renderHabits();
       showDailyPrompt();
 
-      // Add pulse animation to today's habits
       const todayHabits = document.querySelectorAll('.day-check.today:not(.completed)');
       todayHabits.forEach(habit => {
         habit.style.borderColor = '#8b5cf6';
         habit.style.borderWidth = '3px';
       });
     });
-
-    // Add CSS animation for pulse effect
-    const style = document.createElement('style');
-    style.textContent = `
-            @keyframes pulse {
-                0% { transform: scale(1); }
-                50% { transform: scale(1.1); }
-                100% { transform: scale(1); }
-            }
-        `;
-    document.head.appendChild(style);
   </script>
 </body>
 

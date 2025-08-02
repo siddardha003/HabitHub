@@ -13,6 +13,22 @@ class User {
         $this->conn = $db;
     }
 
+    public function getUserById($userId) {
+        $query = "SELECT id, username, email, created_at 
+                 FROM " . $this->table_name . " 
+                 WHERE id = :id";
+        
+        try {
+            $stmt = $this->conn->prepare($query);
+            $stmt->bindParam(":id", $userId);
+            $stmt->execute();
+            
+            return $stmt->fetch(PDO::FETCH_ASSOC);
+        } catch(PDOException $e) {
+            throw new Exception("Error getting user: " . $e->getMessage());
+        }
+    }
+
     public function signup() {
         $query = "INSERT INTO " . $this->table_name . "
                 SET

@@ -8,9 +8,13 @@
             --lavender-pale: #EBDCFB;
             --lavender-medium: #BCA9F5;
             --health-color: #22c55e;
+            --physical-color: #f59e0b;
             --learning-color: #3b82f6;
-            --lifestyle-color: #f59e0b;
             --mindfulness-color: #8b5cf6;
+            --creativity-color: #ec4899;
+            --productivity-color: #10b981;
+            --social-color: #f97316;
+            --lifestyle-color: #f59e0b;
         }
 
         body {
@@ -255,17 +259,15 @@
             transition: width 0.3s ease;
         }
 
-        .habit-card.learning::before {
-            background: var(--learning-color);
-        }
-
-        .habit-card.lifestyle::before {
-            background: var(--lifestyle-color);
-        }
-
-        .habit-card.mindfulness::before {
-            background: var(--mindfulness-color);
-        }
+        /* Category-specific border colors */
+        .habit-card.health::before { background: var(--health-color); }
+        .habit-card.physical::before { background: var(--physical-color); }
+        .habit-card.learning::before { background: var(--learning-color); }
+        .habit-card.mindfulness::before { background: var(--mindfulness-color); }
+        .habit-card.creativity::before { background: var(--creativity-color); }
+        .habit-card.productivity::before { background: var(--productivity-color); }
+        .habit-card.social::before { background: var(--social-color); }
+        .habit-card.lifestyle::before { background: var(--lifestyle-color); }
 
         .habit-header {
             display: flex;
@@ -292,17 +294,15 @@
             background: var(--health-color);
         }
 
-        .habit-card.learning .habit-icon {
-            background: var(--learning-color);
-        }
-
-        .habit-card.lifestyle .habit-icon {
-            background: var(--lifestyle-color);
-        }
-
-        .habit-card.mindfulness .habit-icon {
-            background: var(--mindfulness-color);
-        }
+        /* Category-specific icon colors */
+        .habit-card.health .habit-icon { background: var(--health-color); }
+        .habit-card.physical .habit-icon { background: var(--physical-color); }
+        .habit-card.learning .habit-icon { background: var(--learning-color); }
+        .habit-card.mindfulness .habit-icon { background: var(--mindfulness-color); }
+        .habit-card.creativity .habit-icon { background: var(--creativity-color); }
+        .habit-card.productivity .habit-icon { background: var(--productivity-color); }
+        .habit-card.social .habit-icon { background: var(--social-color); }
+        .habit-card.lifestyle .habit-icon { background: var(--lifestyle-color); }
 
         .habit-title h4 {
             font-size: 16px;
@@ -359,19 +359,38 @@
             color: white;
         }
 
+        /* Category-specific day check colors */
+        .habit-card.health .day-check.completed {
+            background: var(--health-color);
+            border-color: var(--health-color);
+        }
+        .habit-card.physical .day-check.completed {
+            background: var(--physical-color);
+            border-color: var(--physical-color);
+        }
         .habit-card.learning .day-check.completed {
             background: var(--learning-color);
             border-color: var(--learning-color);
         }
-
-        .habit-card.lifestyle .day-check.completed {
-            background: var(--lifestyle-color);
-            border-color: var(--lifestyle-color);
-        }
-
         .habit-card.mindfulness .day-check.completed {
             background: var(--mindfulness-color);
             border-color: var(--mindfulness-color);
+        }
+        .habit-card.creativity .day-check.completed {
+            background: var(--creativity-color);
+            border-color: var(--creativity-color);
+        }
+        .habit-card.productivity .day-check.completed {
+            background: var(--productivity-color);
+            border-color: var(--productivity-color);
+        }
+        .habit-card.social .day-check.completed {
+            background: var(--social-color);
+            border-color: var(--social-color);
+        }
+        .habit-card.lifestyle .day-check.completed {
+            background: var(--lifestyle-color);
+            border-color: var(--lifestyle-color);
         }
 
         .day-check:hover {
@@ -432,4 +451,10 @@
             .habits-grid {
                 grid-template-columns: 1fr;
             }
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
         }
