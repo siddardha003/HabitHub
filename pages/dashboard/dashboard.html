@@ -30,10 +30,6 @@
           Your Habits
         </a>
         <a href="#">
-          <i class="fas fa-eye"></i>
-          Your Habits
-        </a>
-        <a href="#">
           <i class="fas fa-calendar-alt"></i>
           Calendar View
         </a>
@@ -79,15 +75,37 @@
       <!-- Stats Section -->
       <style>
         @keyframes bounce {
-          0%, 100% { transform: scale(1); }
-          50% { transform: scale(1.2); }
+
+          0%,
+          100% {
+            transform: scale(1);
+          }
+
+          50% {
+            transform: scale(1.2);
+          }
         }
-        
+
         @keyframes bounceIn {
-          0% { transform: scale(0.3); opacity: 0; }
-          50% { transform: scale(1.05); opacity: 0.8; }
-          70% { transform: scale(0.9); opacity: 0.9; }
-          100% { transform: scale(1); opacity: 1; }
+          0% {
+            transform: scale(0.3);
+            opacity: 0;
+          }
+
+          50% {
+            transform: scale(1.05);
+            opacity: 0.8;
+          }
+
+          70% {
+            transform: scale(0.9);
+            opacity: 0.9;
+          }
+
+          100% {
+            transform: scale(1);
+            opacity: 1;
+          }
         }
       </style>
       <div class="stats-section">
@@ -100,7 +118,7 @@
           <p>Current Streak</p>
         </div>
         <div class="stat-card">
-          <h3>78%</h3>
+          <h3>0%</h3>
           <p>Weekly Progress</p>
         </div>
         <div class="stat-card">
@@ -120,7 +138,8 @@
         </div>
 
         <!-- Add Habit Modal -->
-        <div class="modal fade" id="addHabitModal" tabindex="-1" aria-labelledby="addHabitModalLabel" aria-hidden="true">
+        <div class="modal fade" id="addHabitModal" tabindex="-1" aria-labelledby="addHabitModalLabel"
+          aria-hidden="true">
           <div class="modal-dialog">
             <div class="modal-content">
               <div class="modal-header">
@@ -167,46 +186,8 @@
 
   <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
   <script>
-    // Static habits data
-    const habits = [
-      {
-        id: 1,
-        name: 'Drink Water',
-        category: 'health',
-        icon: 'fa-tint',
-        currentStreak: 7,
-        weekProgress: [true, true, true, false, false, false, false], // Sun to Sat
-        completedDays: 3,
-        lastCompletedDate: new Date().toDateString() // Track the last completion date
-      },
-      {
-        id: 2,
-        name: 'Read 30 Minutes',
-        category: 'learning',
-        icon: 'fa-book',
-        currentStreak: 3,
-        weekProgress: [false, true, true, true, false, false, false],
-        completedDays: 3,
-      },
-      {
-        id: 3,
-        name: 'Exercise',
-        category: 'lifestyle',
-        icon: 'fa-dumbbell',
-        currentStreak: 5,
-        weekProgress: [true, true, false, false, false, false, false],
-        completedDays: 2,
-      },
-      {
-        id: 4,
-        name: 'Meditation',
-        category: 'mindfulness',
-        icon: 'fa-leaf',
-        currentStreak: 1,
-        weekProgress: [false, false, true, false, false, false, false],
-        completedDays: 1,
-      }
-    ];
+    // Habits data
+    let habits = [];
 
     // Category icons and colors mapping
     const categoryIcons = {
@@ -225,7 +206,7 @@
       try {
         const response = await fetch('../../includes/get_user_data.php');
         const text = await response.text();
-        
+
         let data;
         try {
           data = JSON.parse(text);
@@ -233,7 +214,7 @@
           console.error('Server response:', text);
           throw new Error('Invalid server response');
         }
-        
+
         if (!data.success) {
           throw new Error(data.message || 'Failed to fetch user data');
         }
@@ -264,9 +245,9 @@
         if (hour < 12) greeting += 'Morning';
         else if (hour < 18) greeting += 'Afternoon';
         else greeting += 'Evening';
-        
+
         document.getElementById('greeting').textContent = `${greeting}, Guest!`;
-        
+
         const profileIcon = document.querySelector('.profile-icon');
         if (profileIcon) {
           profileIcon.textContent = 'G';
@@ -287,44 +268,95 @@
     }
 
     // Toggle habit completion
-    function toggleHabit(element) {
+    async function toggleHabit(element) {
       const checkIcon = element.querySelector('.fas.fa-check');
       const habitCard = element.closest('.habit-card');
-      const habitName = habitCard.querySelector('h4').textContent;
-      const habit = habits.find(h => h.name === habitName);
+      const habitId = habitCard.dataset.habitId;
+      const habit = habits.find(h => h.id === parseInt(habitId));
       const today = new Date().getDay();
+      const completed = !element.classList.contains('completed');
 
-      if (element.classList.contains('completed')) {
-        element.classList.remove('completed');
-        checkIcon.style.display = 'none';
-        habit.weekProgress[today] = false;
-        habit.completedDays--;
-        habit.lastCompletedDate = null;
-        
-        playSound('incomplete');
-      } else {
-        element.classList.add('completed');
-        checkIcon.style.display = 'block';
-        habit.weekProgress[today] = true;
-        habit.completedDays++;
-        habit.lastCompletedDate = new Date().toDateString();
+      console.log('Toggle habit debug:', {
+        habitId: habitId,
+        habitFound: !!habit,
+        habitsCount: habits.length,
+        habitIds: habits.map(h => h.id)
+      });
 
-        element.style.transform = 'scale(1.2)';
-        setTimeout(() => {
-          element.style.transform = 'scale(1)';
-        }, 200);
-
-        // Check if this completion results in all habits being completed
-        const allCompleted = habits.every(h => h.weekProgress[today]);
-        if (allCompleted) {
-          showStreakAnimation();
-        }
-
-        playSound('complete');
+      if (!habit) {
+        console.error('Habit not found in habits array. Refreshing habits...');
+        await fetchHabits(); // Refresh habits from server
+        return;
       }
 
-      updateHabitProgress(habitCard, habit);
-      updateStats();
+      try {
+        const response = await fetch('../../includes/toggle_habit.php', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            habitId: habitId,
+            completed: completed,
+            date: new Date().toISOString().split('T')[0]
+          })
+        });
+
+        const responseText = await response.text();
+        console.log('Raw toggle response:', responseText); // Debug log
+
+        let data;
+        try {
+          data = JSON.parse(responseText);
+          console.log('Parsed toggle response:', data); // Debug log
+        } catch (e) {
+          console.error('JSON parse error:', e);
+          console.error('Response text:', responseText);
+          throw new Error('Invalid JSON response from server');
+        }
+
+        if (data.success) {
+          if (completed) {
+            element.classList.add('completed');
+            checkIcon.style.display = 'block';
+            habit.weekProgress[today] = true;
+            habit.completedDays++;
+            habit.currentStreak = data.currentStreak;
+
+            element.style.transform = 'scale(1.2)';
+            setTimeout(() => {
+              element.style.transform = 'scale(1)';
+            }, 200);
+
+            // Check if all habits are completed (from server response)
+            if (data.allHabitsCompleted) {
+              console.log('All habits completed! Global streak:', data.globalStreak); // Debug log
+              showStreakAnimation(data.globalStreak);
+            }
+
+            playSound('complete');
+          } else {
+            element.classList.remove('completed');
+            checkIcon.style.display = 'none';
+            habit.weekProgress[today] = false;
+            habit.completedDays--;
+            habit.currentStreak = data.currentStreak;
+
+            playSound('incomplete');
+          }
+
+          updateHabitProgress(habitCard, habit);
+          updateStats();
+        } else {
+          throw new Error(data.message);
+        }
+      } catch (error) {
+        console.error('Error toggling habit:', error);
+        alert('Failed to update habit. Please try again.');
+        // Revert visual changes if the server update failed
+        element.classList.toggle('completed');
+        checkIcon.style.display = element.classList.contains('completed') ? 'block' : 'none';
+      }
     }
 
     // Play sound effects
@@ -337,10 +369,9 @@
     }
 
     // Show streak animation when all habits are completed
-    function showStreakAnimation() {
-      const stats = getStoredStats();
+    function showStreakAnimation(currentStreak) {
       const streakCard = document.querySelectorAll('.stat-card')[1];
-      
+
       // Create and show the streak celebration overlay
       const overlay = document.createElement('div');
       overlay.style.cssText = `
@@ -355,7 +386,7 @@
         align-items: center;
         z-index: 1000;
       `;
-      
+
       const message = document.createElement('div');
       message.style.cssText = `
         background: white;
@@ -368,41 +399,41 @@
       `;
 
       // Get current achievement level
-      const currentAchievement = calculateAchievementLevel(stats.currentStreak);
-      const nextAchievement = getNextAchievement(stats.currentStreak);
-      
-      const streakText = stats.currentStreak > 1 ? 
-        `🔥 ${stats.currentStreak} Day Win Streak! 🔥` :
+      const currentAchievement = calculateAchievementLevel(currentStreak);
+      const nextAchievement = getNextAchievement(currentStreak);
+
+      const streakText = currentStreak > 1 ?
+        `🔥 ${currentStreak} Day Win Streak! 🔥` :
         `🎉 Streak Started! 🎉`;
-      
+
       let achievementProgress = '';
       if (nextAchievement) {
-        const daysToNext = nextAchievement.days - stats.currentStreak;
+        const daysToNext = nextAchievement.days - currentStreak;
         achievementProgress = `
           <div style="margin-top: 1rem; padding-top: 1rem; border-top: 1px solid #eee;">
             <p style="color: #666;">Current Level: ${currentAchievement.name}</p>
             <p style="color: #666;">Next Achievement: ${nextAchievement.name}</p>
             <p style="color: #666;">${daysToNext} days to go!</p>
             <div style="background: #eee; height: 8px; border-radius: 4px; margin-top: 0.5rem;">
-              <div style="background: ${currentAchievement.color}; width: ${(stats.currentStreak / nextAchievement.days) * 100}%; height: 100%; border-radius: 4px; transition: width 0.3s ease;"></div>
+              <div style="background: ${currentAchievement.color}; width: ${(currentStreak / nextAchievement.days) * 100}%; height: 100%; border-radius: 4px; transition: width 0.3s ease;"></div>
             </div>
           </div>
         `;
       }
-      
+
       message.innerHTML = `
         <h2>${streakText}</h2>
         <p>Amazing! You've completed all habits today!</p>
-        ${stats.currentStreak > 0 ? `<p>Keep going! You're on fire! 🔥</p>` : ''}
+        ${currentStreak > 0 ? `<p>Keep going! You're on fire! 🔥</p>` : ''}
         ${achievementProgress}
       `;
-      
+
       overlay.appendChild(message);
       document.body.appendChild(overlay);
-      
+
       // Add bounce animation to streak number in stats
       streakCard.style.animation = 'bounce 0.5s';
-      
+
       // Remove overlay after 5 seconds (increased from 3 to show achievement progress)
       setTimeout(() => {
         overlay.style.opacity = '0';
@@ -429,7 +460,7 @@
         { days: 365, name: "Interstellar" },
         { days: 500, name: "Galactic" }
       ];
-      
+
       for (const milestone of milestones) {
         if (currentStreak < milestone.days) {
           return milestone;
@@ -437,13 +468,13 @@
       }
       return null; // No next achievement (reached maximum)
     }
-    
+
 
     // Update streak
     function updateStreak(habit) {
       const today = new Date().getDay();
       let streak = 0;
-      
+
       for (let i = today; i >= 0; i--) {
         if (habit.weekProgress[i]) {
           streak++;
@@ -451,7 +482,7 @@
           break;
         }
       }
-      
+
       if (habit.weekProgress[today]) {
         for (let i = 6; i > today; i--) {
           if (habit.weekProgress[i]) {
@@ -461,7 +492,7 @@
           }
         }
       }
-      
+
       habit.currentStreak = streak;
     }
 
@@ -480,20 +511,29 @@
       streakBadge.innerHTML = `<i class="fas fa-fire"></i> ${habit.currentStreak} days`;
     }
 
-    // Get stored stats from localStorage
-    function getStoredStats() {
-      const stored = localStorage.getItem('habitStats');
-      return stored ? JSON.parse(stored) : {
-        currentStreak: 0,
-        bestStreak: 0,
-        lastCompletedDate: null,
-        achievementLevel: 1
-      };
-    }
+    // Get global streak from server
+    async function getGlobalStreak() {
+      try {
+        const response = await fetch('../../includes/get_global_streak.php');
+        const data = await response.json();
 
-    // Save stats to localStorage
-    function saveStats(stats) {
-      localStorage.setItem('habitStats', JSON.stringify(stats));
+        if (data.success) {
+          return {
+            currentStreak: data.current_streak,
+            bestStreak: data.best_streak,
+            lastCompletedDate: data.last_completion_date
+          };
+        } else {
+          throw new Error(data.message);
+        }
+      } catch (error) {
+        console.error('Error fetching global streak:', error);
+        return {
+          currentStreak: 0,
+          bestStreak: 0,
+          lastCompletedDate: null
+        };
+      }
     }
 
     const achievementLevels = [
@@ -531,89 +571,47 @@
       }
       return null; // Return null if user has reached the highest level
     }
-    
+
 
     // Update stats dynamically
-    function updateStats() {
-      const today = new Date().toDateString();
-      let storedStats = getStoredStats();
-      
-      // Check if all habits are completed for today
-      const allHabitsCompleted = habits.every(habit => {
-        const today = new Date().getDay();
-        return habit.weekProgress[today];
-      });
+    async function updateStats() {
+      try {
+        const globalStreak = await getGlobalStreak();
+        console.log('Global streak data:', globalStreak); // Debug log
 
-      // Update streak logic
-      if (allHabitsCompleted) {
-        if (storedStats.lastCompletedDate) {
-          // Check if the last completion was yesterday
-          const lastDate = new Date(storedStats.lastCompletedDate);
-          const yesterday = new Date();
-          yesterday.setDate(yesterday.getDate() - 1);
-          
-          if (lastDate.toDateString() === yesterday.toDateString()) {
-            // Streak continues
-            storedStats.currentStreak++;
-          } else if (lastDate.toDateString() !== today) {
-            // Not consecutive, reset streak
-            storedStats.currentStreak = 1;
-          }
+        const stats = {
+          activeHabits: habits.length,
+          currentStreak: globalStreak.currentStreak,
+          weeklyProgress: Math.round(habits.reduce((acc, h) => acc + (h.completedDays / 7), 0) / habits.length * 100),
+          achievementLevel: calculateAchievementLevel(globalStreak.bestStreak)
+        };
+
+        console.log('Calculated stats:', stats); // Debug log
+
+        // Update UI
+        const statCards = document.querySelectorAll('.stat-card h3');
+        statCards[0].textContent = stats.activeHabits;
+        statCards[1].textContent = stats.currentStreak;
+        statCards[2].textContent = stats.weeklyProgress + '%';
+
+        // Update achievement level with Font Awesome icon
+        const achievement = stats.achievementLevel;
+        statCards[3].innerHTML = `
+          <i class="fas ${achievement.icon}" style="color: ${achievement.color}; font-size: 28px;"></i>
+        `;
+        const achievementCard = statCards[3].closest('.stat-card');
+        achievementCard.querySelector('p').textContent = achievement.name;
+
+        // Add tooltip with achievement info
+        const nextAchievement = getNextAchievement(globalStreak.currentStreak);
+        if (nextAchievement) {
+          const daysToNext = nextAchievement.days - globalStreak.currentStreak;
+          achievementCard.title = `${achievement.name} - Next: ${nextAchievement.name} (${daysToNext} days to go)`;
         } else {
-          // First completion
-          storedStats.currentStreak = 1;
+          achievementCard.title = `${achievement.name} - Maximum level achieved!`;
         }
-        storedStats.lastCompletedDate = today;
-      } else if (storedStats.lastCompletedDate !== today) {
-        // If not all habits completed and it's a new day, reset streak
-        storedStats.currentStreak = 0;
-      }
-
-      // Update best streak if current is higher
-      if (storedStats.currentStreak > storedStats.bestStreak) {
-        storedStats.bestStreak = storedStats.currentStreak;
-      }
-
-      const stats = {
-        activeHabits: habits.length,
-        currentStreak: storedStats.currentStreak,
-        weeklyProgress: Math.round(habits.reduce((acc, h) => acc + (h.completedDays / 7), 0) / habits.length * 100),
-        achievementLevel: calculateAchievementLevel(storedStats.bestStreak)
-      };
-
-      // Save updated stats
-      saveStats(storedStats);
-
-      // Update UI
-      const statCards = document.querySelectorAll('.stat-card h3');
-      statCards[0].textContent = stats.activeHabits;
-      statCards[1].textContent = stats.currentStreak;
-      statCards[2].textContent = stats.weeklyProgress + '%';
-      
-      // Update achievement level with Font Awesome icon
-      const achievement = stats.achievementLevel;
-      statCards[3].innerHTML = `
-        <i class="fas ${achievement.icon}" style="color: ${achievement.color}; font-size: 28px;"></i>
-      `;
-      const achievementCard = statCards[3].closest('.stat-card');
-      achievementCard.querySelector('p').textContent = achievement.name;
-
-      // Add tooltip with achievement info
-      const nextLevel = getNextAchievement(storedStats.currentStreak);
-      if (nextLevel) {
-        const daysToNext = nextLevel.days - storedStats.currentStreak;
-        achievementCard.title = `${achievement.name} - Next: ${nextLevel.name} in ${daysToNext} days`;
-      } else {
-        achievementCard.title = `${achievement.name} - Maximum level achieved!`;
-      }
-      
-      // Add tooltip with achievement info
-      const nextAchievement = getNextAchievement(storedStats.currentStreak);
-      if (nextAchievement) {
-        const daysToNext = nextAchievement.days - storedStats.currentStreak;
-        achievementCard.title = `${achievement.name} - Next: ${nextAchievement.name} (${daysToNext} days to go)`;
-      } else {
-        achievementCard.title = `${achievement.name} - Maximum level achieved!`;
+      } catch (error) {
+        console.error('Error updating stats:', error);
       }
     }
 
@@ -625,13 +623,13 @@
       habits.forEach(habit => {
         const today = new Date().getDay();
         const weekDays = ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
-        
+
         let weekProgressHTML = '';
         habit.weekProgress.forEach((completed, index) => {
           const isToday = index === today;
           const completedClass = completed ? 'completed' : '';
           const todayClass = isToday ? 'today' : '';
-          
+
           weekProgressHTML += `
             <div>
               <div class="day-label">${weekDays[index]}</div>
@@ -643,16 +641,16 @@
         });
 
         const percentage = Math.round((habit.completedDays / 7) * 100);
-        
+
         const habitCard = `
-          <div class="habit-card ${habit.category}">
+          <div class="habit-card ${habit.category}" data-habit-id="${habit.id}">
             <div class="habit-header">
               <div class="habit-title">
                 <div class="habit-icon">
                   <i class="fas ${habit.icon}"></i>
                 </div>
                 <div>
-                  <h4>${habit.name}</h4>
+                  <h4>${habit.name.charAt(0).toUpperCase() + habit.name.slice(1)}</h4>
                   <span>${habit.category.charAt(0).toUpperCase() + habit.category.slice(1)}</span>
                 </div>
               </div>
@@ -672,7 +670,7 @@
             </div>
           </div>
         `;
-        
+
         habitsGrid.innerHTML += habitCard;
       });
     }
@@ -683,35 +681,51 @@
       modal.show();
     }
 
-    function addNewHabit() {
+    async function addNewHabit() {
       const nameInput = document.getElementById('habitName');
       const categorySelect = document.getElementById('habitCategory');
-      
+
       if (!nameInput.value.trim() || !categorySelect.value) {
         alert('Please fill in all fields');
         return;
       }
 
-      const newHabit = {
-        id: habits.length + 1,
-        name: nameInput.value.trim(),
-        category: categorySelect.value,
-        icon: categoryIcons[categorySelect.value],
-        currentStreak: 0,
-        weekProgress: Array(7).fill(false),
-        completedDays: 0
-      };
+      try {
+        const response = await fetch('../../includes/add_habit.php', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            name: nameInput.value.trim(),
+            category: categorySelect.value,
+            icon: categoryIcons[categorySelect.value]
+          })
+        });
 
-      habits.push(newHabit);
+        const data = await response.json();
+        if (data.success) {
+          // Ensure the habit ID is an integer
+          data.habit.id = parseInt(data.habit.id);
+          habits.push(data.habit);
 
-      nameInput.value = '';
-      categorySelect.selectedIndex = 0;
+          console.log('Added new habit:', data.habit); // Debug log
 
-      const modal = bootstrap.Modal.getInstance(document.getElementById('addHabitModal'));
-      modal.hide();
+          nameInput.value = '';
+          categorySelect.selectedIndex = 0;
 
-      renderHabits();
-      updateStats();
+          const modal = bootstrap.Modal.getInstance(document.getElementById('addHabitModal'));
+          modal.hide();
+
+          renderHabits();
+          updateStats();
+        } else {
+          throw new Error(data.message);
+        }
+      } catch (error) {
+        console.error('Error adding habit:', error);
+        alert('Failed to add habit. Please try again.');
+      }
     }
 
     // Daily notification prompt
@@ -742,11 +756,11 @@
     // Logout functionality
     async function handleLogout(event) {
       event.preventDefault();
-      
+
       try {
         const response = await fetch('../../includes/logout.php');
         const data = await response.json();
-        
+
         if (data.success) {
           alert('Logged out successfully');
           window.location.href = '../auth/signin.html';
@@ -759,12 +773,44 @@
       }
     }
 
+    // Fetch habits from server
+    async function fetchHabits() {
+      try {
+        const response = await fetch('../../includes/get_habits.php');
+        const text = await response.text();
+        console.log('Raw response:', text);
+
+        let data;
+        try {
+          data = JSON.parse(text);
+        } catch (e) {
+          console.error('Failed to parse JSON:', text);
+          throw new Error('Invalid JSON response from server');
+        }
+
+        console.log('Parsed response:', data);
+
+        if (data.success) {
+          habits = data.habits;
+          renderHabits();
+          updateStats();
+        } else {
+          if (data.debug) {
+            console.log('Debug info:', data.debug);
+          }
+          throw new Error(data.message);
+        }
+      } catch (error) {
+        console.error('Error fetching habits:', error);
+        alert('Failed to load habits. Please try refreshing the page. Check console for details.');
+      }
+    }
+
     // Initialize app
     document.addEventListener('DOMContentLoaded', function () {
       updateGreeting();
       updateDate();
-      updateStats();
-      renderHabits();
+      fetchHabits();
       showDailyPrompt();
 
       const todayHabits = document.querySelectorAll('.day-check.today:not(.completed)');

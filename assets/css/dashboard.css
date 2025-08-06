@@ -225,14 +225,15 @@
             box-shadow: 0 4px 12px rgba(139, 92, 246, 0.3);
         }
 
-        .habits-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        .habits-section .habits-grid {
+            display: grid !important;
+            grid-template-columns: repeat(auto-fill, 385px) !important;
             gap: 1.5rem;
+            justify-content: start;
         }
 
         /* Habit Card */
-        .habit-card {
+        .habits-section .habit-card {
             background: rgba(255, 255, 255, 0.3);
             backdrop-filter: blur(10px);
             border-radius: 16px;
@@ -241,6 +242,9 @@
             transition: all 0.3s ease;
             position: relative;
             overflow: hidden;
+            width: 385px !important;
+            max-width: 385px !important;
+            min-width: 385px !important;
         }
 
         .habit-card:hover {
@@ -260,14 +264,37 @@
         }
 
         /* Category-specific border colors */
-        .habit-card.health::before { background: var(--health-color); }
-        .habit-card.physical::before { background: var(--physical-color); }
-        .habit-card.learning::before { background: var(--learning-color); }
-        .habit-card.mindfulness::before { background: var(--mindfulness-color); }
-        .habit-card.creativity::before { background: var(--creativity-color); }
-        .habit-card.productivity::before { background: var(--productivity-color); }
-        .habit-card.social::before { background: var(--social-color); }
-        .habit-card.lifestyle::before { background: var(--lifestyle-color); }
+        .habit-card.health::before {
+            background: var(--health-color);
+        }
+
+        .habit-card.physical::before {
+            background: var(--physical-color);
+        }
+
+        .habit-card.learning::before {
+            background: var(--learning-color);
+        }
+
+        .habit-card.mindfulness::before {
+            background: var(--mindfulness-color);
+        }
+
+        .habit-card.creativity::before {
+            background: var(--creativity-color);
+        }
+
+        .habit-card.productivity::before {
+            background: var(--productivity-color);
+        }
+
+        .habit-card.social::before {
+            background: var(--social-color);
+        }
+
+        .habit-card.lifestyle::before {
+            background: var(--lifestyle-color);
+        }
 
         .habit-header {
             display: flex;
@@ -295,14 +322,37 @@
         }
 
         /* Category-specific icon colors */
-        .habit-card.health .habit-icon { background: var(--health-color); }
-        .habit-card.physical .habit-icon { background: var(--physical-color); }
-        .habit-card.learning .habit-icon { background: var(--learning-color); }
-        .habit-card.mindfulness .habit-icon { background: var(--mindfulness-color); }
-        .habit-card.creativity .habit-icon { background: var(--creativity-color); }
-        .habit-card.productivity .habit-icon { background: var(--productivity-color); }
-        .habit-card.social .habit-icon { background: var(--social-color); }
-        .habit-card.lifestyle .habit-icon { background: var(--lifestyle-color); }
+        .habit-card.health .habit-icon {
+            background: var(--health-color);
+        }
+
+        .habit-card.physical .habit-icon {
+            background: var(--physical-color);
+        }
+
+        .habit-card.learning .habit-icon {
+            background: var(--learning-color);
+        }
+
+        .habit-card.mindfulness .habit-icon {
+            background: var(--mindfulness-color);
+        }
+
+        .habit-card.creativity .habit-icon {
+            background: var(--creativity-color);
+        }
+
+        .habit-card.productivity .habit-icon {
+            background: var(--productivity-color);
+        }
+
+        .habit-card.social .habit-icon {
+            background: var(--social-color);
+        }
+
+        .habit-card.lifestyle .habit-icon {
+            background: var(--lifestyle-color);
+        }
 
         .habit-title h4 {
             font-size: 16px;
@@ -364,30 +414,37 @@
             background: var(--health-color);
             border-color: var(--health-color);
         }
+
         .habit-card.physical .day-check.completed {
             background: var(--physical-color);
             border-color: var(--physical-color);
         }
+
         .habit-card.learning .day-check.completed {
             background: var(--learning-color);
             border-color: var(--learning-color);
         }
+
         .habit-card.mindfulness .day-check.completed {
             background: var(--mindfulness-color);
             border-color: var(--mindfulness-color);
         }
+
         .habit-card.creativity .day-check.completed {
             background: var(--creativity-color);
             border-color: var(--creativity-color);
         }
+
         .habit-card.productivity .day-check.completed {
             background: var(--productivity-color);
             border-color: var(--productivity-color);
         }
+
         .habit-card.social .day-check.completed {
             background: var(--social-color);
             border-color: var(--social-color);
         }
+
         .habit-card.lifestyle .day-check.completed {
             background: var(--lifestyle-color);
             border-color: var(--lifestyle-color);
@@ -423,6 +480,13 @@
         }
 
         /* Responsive Design */
+        @media (max-width: 1024px) {
+            .habits-section .habits-grid {
+                grid-template-columns: repeat(auto-fill, 385px) !important;
+                justify-content: center;
+            }
+        }
+
         @media (max-width: 768px) {
             .sidebar {
                 transform: translateX(-100%);
@@ -448,13 +512,29 @@
                 grid-template-columns: 1fr;
             }
 
-            .habits-grid {
-                grid-template-columns: 1fr;
+            .habits-section .habits-grid {
+                grid-template-columns: 1fr !important;
+                justify-content: stretch;
+            }
+
+            .habits-section .habit-card {
+                width: 100% !important;
+                max-width: 400px !important;
+                min-width: unset !important;
+                margin: 0 auto;
             }
         }
 
         @keyframes pulse {
-            0% { transform: scale(1); }
-            50% { transform: scale(1.1); }
-            100% { transform: scale(1); }
+            0% {
+                transform: scale(1);
+            }
+
+            50% {
+                transform: scale(1.1);
+            }
+
+            100% {
+                transform: scale(1);
+            }
         }
