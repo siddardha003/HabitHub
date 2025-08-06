@@ -1,160 +1,456 @@
-// Update greeting with current time and user name
-function updateGreeting() {
-    const userName = localStorage.getItem('userName') || 'User';
-    document.getElementById('user-name').textContent = userName;
+// Habits page specific functionality
+let habitsData = [];
+let habitToDelete = null;
 
-    const now = new Date();
-    const hour = now.getHours();
-    let greeting = '';
+// Category icons mapping (reusing from dashboard.js)
+const categoryIconsHabits = {
+  health: 'fa-heart',
+  physical: 'fa-dumbbell',
+  learning: 'fa-book',
+  mindfulness: 'fa-leaf',
+  creativity: 'fa-paint-brush',
+  productivity: 'fa-tasks',
+  social: 'fa-users',
+  lifestyle: 'fa-home'
+};
 
-    if (hour < 12) greeting = 'Good morning';
-    else if (hour < 17) greeting = 'Good afternoon';
-    else greeting = 'Good evening';
+// Fetch and render habits in table format
+async function fetchAndRenderHabitsTable() {
+  try {
+    const response = await fetch('../../includes/get_habits.php');
+    const text = await response.text();
+    console.log('Raw response:', text);
 
-    document.getElementById('greeting-message').textContent = `${greeting}! Let's manage your habits`;
-    
-    // Update date and time
-    const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
-    document.getElementById('current-date').textContent = now.toLocaleDateString('en-US', options);
-    document.getElementById('current-time').textContent = now.toLocaleTimeString('en-US');
-}
-
-// Handle habit form submission
-document.getElementById('add-habit-form').addEventListener('submit', function(e) {
-    e.preventDefault();
-    
-    const habitName = document.getElementById('habit-name').value;
-    const frequency = document.getElementById('habit-frequency').value;
-    
-    addHabit(habitName, frequency);
-    this.reset();
-});
-
-// Add new habit
-function addHabit(name, frequency) {
-    const habits = getHabits();
-    const newHabit = {
-        id: Date.now(),
-        name: name,
-        frequency: frequency,
-        createdAt: new Date().toISOString(),
-        streak: 0,
-        lastCompleted: null
-    };
-    
-    habits.push(newHabit);
-    localStorage.setItem('habits', JSON.stringify(habits));
-    displayHabits();
-}
-
-// Get habits from localStorage
-function getHabits() {
-    return JSON.parse(localStorage.getItem('habits')) || [];
-}
-
-// Delete habit
-function deleteHabit(id) {
-    const habits = getHabits();
-    const updatedHabits = habits.filter(habit => habit.id !== id);
-    localStorage.setItem('habits', JSON.stringify(updatedHabits));
-    displayHabits();
-}
-
-// Display habits
-function displayHabits(filter = 'all') {
-    const habitsGrid = document.getElementById('habits-grid');
-    const habits = getHabits();
-    
-    const filteredHabits = filter === 'all' 
-        ? habits 
-        : habits.filter(habit => habit.frequency === filter);
-    
-    habitsGrid.innerHTML = filteredHabits.map(habit => `
-        <div class="habit-card">
-            <div class="habit-meta">
-                <h3 class="habit-title">${habit.name}</h3>
-                <span class="habit-frequency">${habit.frequency}</span>
-            </div>
-            <p class="habit-streak">
-                <i class="fas fa-fire"></i> ${habit.streak} day streak
-            </p>
-            <div class="habit-actions">
-                <button class="habit-button complete-button" onclick="markHabitComplete(${habit.id})">
-                    <i class="fas fa-check"></i> Complete
-                </button>
-                <button class="habit-button delete-button" onclick="deleteHabit(${habit.id})">
-                    <i class="fas fa-trash"></i> Delete
-                </button>
-            </div>
-        </div>
-    `).join('');
-}
-
-// Get badge color based on frequency
-function getFrequencyColor(frequency) {
-    switch(frequency) {
-        case 'daily': return 'primary';
-        case 'weekly': return 'success';
-        case 'monthly': return 'warning';
-        default: return 'secondary';
+    let data;
+    try {
+      data = JSON.parse(text);
+    } catch (e) {
+      console.error('Failed to parse JSON:', text);
+      throw new Error('Invalid JSON response from server');
     }
-}
 
-// Mark habit as complete
-function markHabitComplete(id) {
-    const habits = getHabits();
-    const habit = habits.find(h => h.id === id);
-    
-    if (habit) {
-        const today = new Date().toDateString();
-        if (habit.lastCompleted !== today) {
-            habit.streak++;
-            habit.lastCompleted = today;
-            localStorage.setItem('habits', JSON.stringify(habits));
-            displayHabits();
-        }
+    console.log('Parsed response:', data);
+
+    if (data.success) {
+      habitsData = data.habits;
+      renderHabitsTable();
+    } else {
+      if (data.debug) {
+        console.log('Debug info:', data.debug);
+      }
+      throw new Error(data.message);
     }
+  } catch (error) {
+    console.error('Error fetching habits:', error);
+    alert('Failed to load habits. Please try refreshing the page.');
+  }
 }
 
-// Handle habit filters
-document.querySelectorAll('.habit-filters button').forEach(button => {
-    button.addEventListener('click', function() {
-        document.querySelectorAll('.habit-filters button').forEach(btn => btn.classList.remove('active'));
-        this.classList.add('active');
-        displayHabits(this.dataset.filter);
+// Render habits in table format
+function renderHabitsTable() {
+  const tableBody = document.getElementById('habitsTableBody');
+  const mobileCards = document.getElementById('habitsMobileCards');
+  const emptyState = document.getElementById('emptyState');
+  const tableContainer = document.querySelector('.habits-table-container .table-responsive');
+
+  if (!habitsData || habitsData.length === 0) {
+    tableContainer.style.display = 'none';
+    mobileCards.style.display = 'none';
+    emptyState.style.display = 'block';
+    return;
+  }
+
+  emptyState.style.display = 'none';
+  tableBody.innerHTML = '';
+  mobileCards.innerHTML = '';
+
+  habitsData.forEach(habit => {
+    const weeklyProgress = Math.round((habit.completedDays / 7) * 100);
+    const createdDate = new Date(habit.created_at || Date.now()).toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric'
     });
-});
 
-// Initialize
-// Update stats
-function updateStats() {
-    const habits = getHabits();
-    const today = new Date().toDateString();
-    
-    // Total habits
-    document.getElementById('total-habits').textContent = habits.length;
-    
-    // Completed today
-    const completedToday = habits.filter(h => h.lastCompleted === today).length;
-    document.getElementById('total-completed').textContent = completedToday;
-    
-    // Longest streak
-    const longestStreak = habits.reduce((max, h) => Math.max(max, h.streak), 0);
-    document.getElementById('longest-streak').textContent = longestStreak;
-    
-    // Success rate
-    const successRate = habits.length ? Math.round((completedToday / habits.length) * 100) : 0;
-    document.getElementById('success-rate').textContent = successRate + '%';
+    // Desktop table row
+    const row = `
+      <tr data-habit-id="${habit.id}">
+        <td>
+          <div class="habit-info-cell">
+            <div class="habit-icon-table ${habit.category}">
+              <i class="fas ${habit.icon}"></i>
+            </div>
+            <div class="habit-details">
+              <h5>${habit.name.charAt(0).toUpperCase() + habit.name.slice(1)}</h5>
+              <span>${habit.category}</span>
+            </div>
+          </div>
+        </td>
+        <td>
+          <span class="category-badge ${habit.category}">
+            ${habit.category}
+          </span>
+        </td>
+        <td>
+          <div class="streak-badge-table">
+            <i class="fas fa-fire"></i>
+            ${habit.currentStreak || 0} days
+          </div>
+        </td>
+        <td>
+          <div class="progress-bar-container">
+            <div class="progress-bar-custom">
+              <div class="progress-bar-fill" style="width: ${weeklyProgress}%"></div>
+            </div>
+            <div class="progress-text">${habit.completedDays || 0}/7 completed</div>
+          </div>
+        </td>
+        <td>
+          <span class="date-display">${createdDate}</span>
+        </td>
+        <td>
+          <div class="action-buttons">
+            <button class="btn-action btn-edit" onclick="editHabit(${habit.id})" title="Edit Habit">
+              <i class="fas fa-edit"></i>
+              Edit
+            </button>
+            <button class="btn-action btn-delete" onclick="openDeleteModal(${habit.id})" title="Delete Habit">
+              <i class="fas fa-trash"></i>
+              Delete
+            </button>
+          </div>
+        </td>
+      </tr>
+    `;
+
+    // Mobile card
+    const card = `
+      <div class="habit-mobile-card" data-habit-id="${habit.id}">
+        <div class="habit-mobile-header">
+          <div class="habit-icon-table ${habit.category}">
+            <i class="fas ${habit.icon}"></i>
+          </div>
+          <div class="habit-mobile-info">
+            <h5>${habit.name.charAt(0).toUpperCase() + habit.name.slice(1)}</h5>
+            <span class="category-badge ${habit.category}">${habit.category}</span>
+          </div>
+        </div>
+        
+        <div class="habit-mobile-stats">
+          <div class="habit-mobile-stat">
+            <div class="habit-mobile-stat-label">Current Streak</div>
+            <div class="habit-mobile-stat-value">
+              <i class="fas fa-fire" style="color: #ff6b6b; margin-right: 0.25rem;"></i>
+              ${habit.currentStreak || 0} days
+            </div>
+          </div>
+          <div class="habit-mobile-stat">
+            <div class="habit-mobile-stat-label">Weekly Progress</div>
+            <div class="habit-mobile-stat-value">${habit.completedDays || 0}/7 (${weeklyProgress}%)</div>
+          </div>
+        </div>
+        
+        <div class="habit-mobile-stat" style="margin-bottom: 1rem;">
+          <div class="habit-mobile-stat-label">Created</div>
+          <div class="habit-mobile-stat-value">${createdDate}</div>
+        </div>
+        
+        <div class="habit-mobile-actions">
+          <button class="btn-action btn-edit" onclick="editHabit(${habit.id})">
+            <i class="fas fa-edit"></i>
+            Edit
+          </button>
+          <button class="btn-action btn-delete" onclick="openDeleteModal(${habit.id})">
+            <i class="fas fa-trash"></i>
+            Delete
+          </button>
+        </div>
+      </div>
+    `;
+
+    tableBody.innerHTML += row;
+    mobileCards.innerHTML += card;
+  });
 }
 
-document.addEventListener('DOMContentLoaded', function() {
-    updateGreeting();
-    displayHabits();
-    updateStats();
+// Open delete confirmation modal
+function openDeleteModal(habitId) {
+  const habit = habitsData.find(h => h.id === parseInt(habitId));
+  if (!habit) {
+    console.error('Habit not found');
+    return;
+  }
+
+  habitToDelete = habit;
+  
+  // Update modal content
+  document.getElementById('deleteHabitName').textContent = habit.name.charAt(0).toUpperCase() + habit.name.slice(1);
+  document.getElementById('deleteHabitCategory').textContent = `Category: ${habit.category.charAt(0).toUpperCase() + habit.category.slice(1)}`;
+
+  // Show modal
+  const modal = new bootstrap.Modal(document.getElementById('deleteHabitModal'));
+  modal.show();
+}
+
+// Confirm and delete habit
+async function confirmDeleteHabit() {
+  if (!habitToDelete) {
+    console.error('No habit selected for deletion');
+    return;
+  }
+
+  try {
+    const response = await fetch('../../includes/delete_habit.php', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        habitId: habitToDelete.id
+      })
+    });
+
+    const data = await response.json();
     
-    // Update time and stats every second
-    setInterval(() => {
-        updateGreeting();
-        updateStats();
-    }, 1000);
+    if (data.success) {
+      // Remove habit from local array
+      habitsData = habitsData.filter(h => h.id !== habitToDelete.id);
+      
+      // Re-render table
+      renderHabitsTable();
+      
+      // Hide modal
+      const modal = bootstrap.Modal.getInstance(document.getElementById('deleteHabitModal'));
+      modal.hide();
+      
+      // Reset habitToDelete
+      habitToDelete = null;
+      
+      // Show success message
+      showNotification('Habit deleted successfully!', 'success');
+    } else {
+      throw new Error(data.message || 'Failed to delete habit');
+    }
+  } catch (error) {
+    console.error('Error deleting habit:', error);
+    showNotification('Failed to delete habit. Please try again.', 'error');
+  }
+}
+
+// Edit habit functionality
+let habitToEdit = null;
+
+function editHabit(habitId) {
+  const habit = habitsData.find(h => h.id === parseInt(habitId));
+  if (!habit) {
+    console.error('Habit not found');
+    return;
+  }
+
+  habitToEdit = habit;
+  
+  // Populate the edit form
+  document.getElementById('editHabitName').value = habit.name;
+  document.getElementById('editHabitCategory').value = habit.category;
+
+  // Show modal
+  const modal = new bootstrap.Modal(document.getElementById('editHabitModal'));
+  modal.show();
+}
+
+// Confirm and update habit
+async function confirmEditHabit() {
+  if (!habitToEdit) {
+    console.error('No habit selected for editing');
+    return;
+  }
+
+  const nameInput = document.getElementById('editHabitName');
+  const categorySelect = document.getElementById('editHabitCategory');
+
+  if (!nameInput.value.trim() || !categorySelect.value) {
+    showNotification('Please fill in all fields', 'error');
+    return;
+  }
+
+  try {
+    const response = await fetch('../../includes/edit_habit.php', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        habitId: habitToEdit.id,
+        name: nameInput.value.trim(),
+        category: categorySelect.value,
+        icon: categoryIconsHabits[categorySelect.value]
+      })
+    });
+
+    const data = await response.json();
+    
+    if (data.success) {
+      // Update habit in local array
+      const habitIndex = habitsData.findIndex(h => h.id === habitToEdit.id);
+      if (habitIndex !== -1) {
+        habitsData[habitIndex] = {
+          ...habitsData[habitIndex],
+          name: nameInput.value.trim(),
+          category: categorySelect.value,
+          icon: categoryIconsHabits[categorySelect.value]
+        };
+      }
+      
+      // Re-render table
+      renderHabitsTable();
+      
+      // Hide modal
+      const modal = bootstrap.Modal.getInstance(document.getElementById('editHabitModal'));
+      modal.hide();
+      
+      // Reset habitToEdit
+      habitToEdit = null;
+      
+      // Show success message
+      showNotification('Habit updated successfully!', 'success');
+    } else {
+      throw new Error(data.message || 'Failed to update habit');
+    }
+  } catch (error) {
+    console.error('Error updating habit:', error);
+    showNotification('Failed to update habit. Please try again.', 'error');
+  }
+}
+
+// Add new habit (reusing from dashboard.js but adapted for table view)
+async function addNewHabitTable() {
+  const nameInput = document.getElementById('habitName');
+  const categorySelect = document.getElementById('habitCategory');
+
+  if (!nameInput.value.trim() || !categorySelect.value) {
+    showNotification('Please fill in all fields', 'error');
+    return;
+  }
+
+  try {
+    const response = await fetch('../../includes/add_habit.php', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        name: nameInput.value.trim(),
+        category: categorySelect.value,
+        icon: categoryIconsHabits[categorySelect.value]
+      })
+    });
+
+    const data = await response.json();
+    if (data.success) {
+      // Ensure the habit ID is an integer
+      data.habit.id = parseInt(data.habit.id);
+      habitsData.push(data.habit);
+
+      console.log('Added new habit:', data.habit);
+
+      // Clear form
+      nameInput.value = '';
+      categorySelect.selectedIndex = 0;
+
+      // Hide modal
+      const modal = bootstrap.Modal.getInstance(document.getElementById('addHabitModal'));
+      modal.hide();
+
+      // Re-render table
+      renderHabitsTable();
+      
+      showNotification('Habit added successfully!', 'success');
+    } else {
+      throw new Error(data.message);
+    }
+  } catch (error) {
+    console.error('Error adding habit:', error);
+    showNotification('Failed to add habit. Please try again.', 'error');
+  }
+}
+
+// Show notification
+function showNotification(message, type = 'info') {
+  // Create notification element
+  const notification = document.createElement('div');
+  notification.className = `notification notification-${type}`;
+  notification.style.cssText = `
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    padding: 1rem 1.5rem;
+    border-radius: 0.5rem;
+    color: white;
+    font-weight: 500;
+    z-index: 1050;
+    animation: slideIn 0.3s ease;
+  `;
+
+  // Set background color based on type
+  switch (type) {
+    case 'success':
+      notification.style.background = '#10b981';
+      break;
+    case 'error':
+      notification.style.background = '#ef4444';
+      break;
+    default:
+      notification.style.background = '#3b82f6';
+  }
+
+  notification.textContent = message;
+  document.body.appendChild(notification);
+
+  // Remove notification after 3 seconds
+  setTimeout(() => {
+    notification.style.animation = 'slideOut 0.3s ease';
+    setTimeout(() => {
+      document.body.removeChild(notification);
+    }, 300);
+  }, 3000);
+}
+
+// Override the addNewHabit function for habits page
+function addNewHabit() {
+  addNewHabitTable();
+}
+
+// Initialize habits page
+document.addEventListener('DOMContentLoaded', function() {
+  // Only run habits-specific code if we're on the habits page
+  if (document.getElementById('habitsTable')) {
+    fetchAndRenderHabitsTable();
+  }
 });
+
+// Add CSS for notifications
+const notificationStyles = document.createElement('style');
+notificationStyles.textContent = `
+  @keyframes slideIn {
+    from {
+      transform: translateX(100%);
+      opacity: 0;
+    }
+    to {
+      transform: translateX(0);
+      opacity: 1;
+    }
+  }
+  
+  @keyframes slideOut {
+    from {
+      transform: translateX(0);
+      opacity: 1;
+    }
+    to {
+      transform: translateX(100%);
+      opacity: 0;
+    }
+  }
+`;
+document.head.appendChild(notificationStyles);
