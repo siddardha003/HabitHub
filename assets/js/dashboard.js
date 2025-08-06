@@ -69,6 +69,9 @@ async function updateGreeting() {
 
 // Update current date
 function updateDate() {
+    const currentDateElement = document.getElementById('currentDate');
+    if (!currentDateElement) return; // Exit if element doesn't exist (e.g., on calendar page)
+
     const now = new Date();
     const options = {
         weekday: 'long',
@@ -76,7 +79,7 @@ function updateDate() {
         month: 'long',
         day: 'numeric'
     };
-    document.getElementById('currentDate').textContent = now.toLocaleDateString('en-US', options);
+    currentDateElement.textContent = now.toLocaleDateString('en-US', options);
 }
 
 // Toggle habit completion
