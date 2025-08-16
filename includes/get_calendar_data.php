@@ -128,7 +128,6 @@ try {
             }
             
             if ($dayTotal > 0) {
-                $activeDays++;
                 $totalCompletions += $dayCompletions;
                 $totalPossible += $dayTotal;
                 
@@ -151,30 +150,55 @@ try {
         }
     }
 
-    // Calculate current streak (simplified - count consecutive days from today backwards)
-    $today = date('Y-m-d');
-    $streakDate = $today;
+    // Update and get current streak from global streak system
     $currentStreak = 0;
-    
-    for ($i = 0; $i < 30; $i++) { // Check last 30 days
-        $checkDate = date('Y-m-d', strtotime($streakDate . " -$i days"));
-        $dayCompletions = 0;
-        $dayTotal = count($habits);
+    try {
+        // First, update the global streak to ensure it's current
+        require_once 'update_global_streak.php';
+        $streakData = updateGlobalStreak($userId);
+        $currentStreak = $streakData['current_streak'];
+    } catch (Exception $e) {
+        error_log("Global streak update failed: " . $e->getMessage());
         
-        foreach ($habits as $habit) {
-            if (isset($completions[$checkDate][$habit['id']]) && $completions[$checkDate][$habit['id']]) {
-                $dayCompletions++;
+        // Fallback: try to get from database
+        try {
+            $streakQuery = "SELECT current_streak FROM user_streaks WHERE user_id = ?";
+            $streakStmt = $pdo->prepare($streakQuery);
+            $streakStmt->execute([$userId]);
+            $streakResult = $streakStmt->fetch(PDO::FETCH_ASSOC);
+            
+            if ($streakResult) {
+                $currentStreak = (int)$streakResult['current_streak'];
             }
-        }
-        
-        if ($dayCompletions === $dayTotal && $dayTotal > 0) {
-            $currentStreak++;
-        } else {
-            break;
+        } catch (PDOException $e2) {
+            error_log("Streak fallback query failed: " . $e2->getMessage());
+            $currentStreak = 0;
         }
     }
 
     $overallProgress = $totalPossible > 0 ? round(($totalCompletions / $totalPossible) * 100) : 0;
+    
+    // Calculate active days from server-side visit tracking
+    $activeDays = 0;
+    try {
+        $visitsStmt = $pdo->prepare("
+            SELECT COUNT(DISTINCT visit_date) as active_days
+            FROM user_visits 
+            WHERE user_id = ? 
+            AND visit_date BETWEEN ? AND ?
+        ");
+        $visitsStmt->execute([$userId, $startDate, $endDate]);
+        $visitResult = $visitsStmt->fetch(PDO::FETCH_ASSOC);
+        $activeDays = (int)$visitResult['active_days'];
+    } catch (PDOException $e) {
+        // Fallback: count days with habit interactions
+        error_log("Visits query failed, using fallback: " . $e->getMessage());
+        foreach ($completions as $date => $dayData) {
+            if (count($dayData) > 0) {
+                $activeDays++;
+            }
+        }
+    }
 
     echo json_encode([
         'success' => true,
