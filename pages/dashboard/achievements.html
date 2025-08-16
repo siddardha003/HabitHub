@@ -1,0 +1,1452 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HabitHub - Achievements</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --lavender-pale: #EBDCFB;
+            --lavender-medium: #BCA9F5;
+            --health-color: #22c55e;
+            --learning-color: #3b82f6;
+            --lifestyle-color: #f59e0b;
+            --mindfulness-color: #8b5cf6;
+            --bronze: #cd7f32;
+            --silver: #c0c0c0;
+            --gold: #ffd700;
+            --platinum: #e5e4e2;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, var(--lavender-pale) 0%, var(--lavender-medium) 100%);
+            min-height: 100vh;
+        }
+
+        .dashboard-container {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            width: 240px;
+            background-color: #e0d4f7;
+            padding: 2rem 1rem;
+            display: flex;
+            flex-direction: column;
+            border-right: 1px solid #ccc;
+            position: fixed;
+            height: 100vh;
+            overflow-y: auto;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 3rem;
+        }
+
+        .logo i {
+            font-size: 32px;
+            color: #8b5cf6;
+        }
+
+        .logo h2 {
+            font-size: 20px;
+            color: #333;
+            font-weight: 600;
+        }
+
+        .nav-links {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .nav-links a {
+            text-decoration: none;
+            color: #444;
+            font-weight: 500;
+            padding: 0.75rem 1rem;
+            border-radius: 8px;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .nav-links a.active,
+        .nav-links a:hover {
+            background-color: #c3b3f2;
+            color: #000;
+            transform: translateX(5px);
+        }
+
+        .nav-links i {
+            width: 20px;
+        }
+
+        /* Main Content */
+        .main-content {
+            flex: 1;
+            padding: 2rem;
+            margin-left: 240px;
+        }
+
+        /* Hero Section */
+        .hero-section {
+            background: rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(10px);
+            padding: 2rem;
+            border-radius: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            margin-bottom: 2rem;
+            text-align: center;
+        }
+
+        .level-display {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .level-badge {
+            position: relative;
+            width: 120px;
+            height: 120px;
+            background: linear-gradient(135deg, var(--gold), #ffed4e);
+            border-radius: 50%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 0 30px rgba(255, 215, 0, 0.4);
+            animation: levelGlow 2s ease-in-out infinite alternate;
+        }
+
+        .level-badge::before {
+            content: '';
+            position: absolute;
+            top: -10px;
+            left: -10px;
+            right: -10px;
+            bottom: -10px;
+            background: linear-gradient(45deg, #ffd700, #ffed4e, #ffd700);
+            border-radius: 50%;
+            z-index: -1;
+            opacity: 0.3;
+        }
+
+        .level-number {
+            font-size: 32px;
+            font-weight: 700;
+            color: #333;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .level-title {
+            font-size: 12px;
+            font-weight: 600;
+            color: #555;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .level-info h2 {
+            font-size: 28px;
+            color: #333;
+            margin-bottom: 0.5rem;
+        }
+
+        .level-info p {
+            color: #666;
+            margin-bottom: 1rem;
+        }
+
+        .level-progress {
+            width: 300px;
+            height: 12px;
+            background: rgba(0, 0, 0, 0.1);
+            border-radius: 6px;
+            overflow: hidden;
+            margin-bottom: 0.5rem;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--mindfulness-color), var(--health-color));
+            border-radius: 6px;
+            transition: width 1s ease;
+            position: relative;
+        }
+
+        .progress-fill::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+            animation: shimmer 2s infinite;
+        }
+
+        .xp-info {
+            font-size: 14px;
+            color: #666;
+        }
+
+        /* Stats Grid */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            background: rgba(255, 255, 255, 0.25);
+            backdrop-filter: blur(10px);
+            padding: 1.5rem;
+            border-radius: 16px;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            text-align: center;
+            transition: transform 0.2s ease;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .stat-card h3 {
+            font-size: 24px;
+            font-weight: 700;
+            color: #333;
+            margin-bottom: 5px;
+        }
+
+        .stat-card p {
+            color: #666;
+            font-size: 14px;
+            margin: 0;
+        }
+
+        /* Category Tabs */
+        .category-tabs {
+            display: flex;
+            background: rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(10px);
+            border-radius: 12px;
+            padding: 0.5rem;
+            margin-bottom: 2rem;
+            overflow-x: auto;
+            gap: 0.5rem;
+        }
+
+        .category-tab {
+            background: transparent;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            color: #666;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-weight: 500;
+            white-space: nowrap;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .category-tab.active {
+            background: rgba(139, 92, 246, 0.2);
+            color: #8b5cf6;
+            font-weight: 600;
+        }
+
+        .category-tab:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        /* Filter Controls */
+        .filter-controls {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .filter-buttons {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+        }
+
+        .filter-btn {
+            background: rgba(255, 255, 255, 0.3);
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            color: #666;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-size: 14px;
+        }
+
+        .filter-btn.active {
+            background: var(--mindfulness-color);
+            color: white;
+        }
+
+        .search-box {
+            background: rgba(255, 255, 255, 0.3);
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            color: #333;
+            width: 200px;
+            backdrop-filter: blur(10px);
+        }
+
+        .search-box::placeholder {
+            color: #666;
+        }
+
+        /* Achievements Grid */
+        .achievements-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        /* Achievement Card */
+        .achievement-card {
+            background: rgba(255, 255, 255, 0.3);
+            backdrop-filter: blur(10px);
+            border-radius: 16px;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            padding: 1.5rem;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .achievement-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        }
+
+        .achievement-card.earned {
+            border: 2px solid var(--gold);
+            box-shadow: 0 0 20px rgba(255, 215, 0, 0.2);
+        }
+
+        .achievement-card.locked {
+            opacity: 0.6;
+            filter: grayscale(50%);
+        }
+
+        .achievement-header {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .achievement-icon {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            position: relative;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        .achievement-icon.bronze {
+            background: linear-gradient(135deg, var(--bronze), #e6a85c);
+        }
+
+        .achievement-icon.silver {
+            background: linear-gradient(135deg, var(--silver), #d4d4d4);
+        }
+
+        .achievement-icon.gold {
+            background: linear-gradient(135deg, var(--gold), #ffed4e);
+            animation: goldGlow 2s ease-in-out infinite alternate;
+        }
+
+        .achievement-icon.platinum {
+            background: linear-gradient(135deg, var(--platinum), #f0f0f0);
+            box-shadow: 0 0 20px rgba(229, 228, 226, 0.5);
+        }
+
+        .achievement-info h4 {
+            font-size: 16px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 0.25rem;
+        }
+
+        .achievement-rarity {
+            font-size: 12px;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 0.25rem;
+        }
+
+        .achievement-rarity.common {
+            color: #6b7280;
+        }
+
+        .achievement-rarity.rare {
+            color: #3b82f6;
+        }
+
+        .achievement-rarity.epic {
+            color: #8b5cf6;
+        }
+
+        .achievement-rarity.legendary {
+            color: var(--gold);
+        }
+
+        .achievement-points {
+            font-size: 12px;
+            color: #666;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .achievement-description {
+            color: #666;
+            font-size: 14px;
+            margin-bottom: 1rem;
+            line-height: 1.4;
+        }
+
+        .achievement-progress {
+            margin-bottom: 1rem;
+        }
+
+        .progress-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.5rem;
+        }
+
+        .progress-text {
+            font-size: 12px;
+            color: #666;
+            font-weight: 500;
+        }
+
+        .progress-percentage {
+            font-size: 12px;
+            color: #333;
+            font-weight: 600;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 6px;
+            background: rgba(0, 0, 0, 0.1);
+            border-radius: 3px;
+            overflow: hidden;
+        }
+
+        .progress-bar-fill {
+            height: 100%;
+            border-radius: 3px;
+            transition: width 1s ease;
+        }
+
+        .progress-bar-fill.common {
+            background: #6b7280;
+        }
+
+        .progress-bar-fill.rare {
+            background: #3b82f6;
+        }
+
+        .progress-bar-fill.epic {
+            background: #8b5cf6;
+        }
+
+        .progress-bar-fill.legendary {
+            background: var(--gold);
+        }
+
+        .achievement-date {
+            font-size: 12px;
+            color: #666;
+            text-align: center;
+            font-style: italic;
+        }
+
+        .share-btn {
+            background: linear-gradient(135deg, #8b5cf6, #3b82f6);
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            font-size: 12px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            width: 100%;
+            margin-top: 0.5rem;
+        }
+
+        .share-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(139, 92, 246, 0.3);
+        }
+
+        /* Recent Achievements Timeline */
+        .recent-achievements {
+            background: rgba(255, 255, 255, 0.25);
+            backdrop-filter: blur(10px);
+            border-radius: 16px;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            padding: 1.5rem;
+            margin-top: 2rem;
+        }
+
+        .recent-achievements h3 {
+            font-size: 20px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .timeline {
+            position: relative;
+        }
+
+        .timeline::before {
+            content: '';
+            position: absolute;
+            left: 20px;
+            top: 0;
+            bottom: 0;
+            width: 2px;
+            background: linear-gradient(to bottom, var(--mindfulness-color), var(--health-color));
+        }
+
+        .timeline-item {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+            position: relative;
+        }
+
+        .timeline-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+            z-index: 1;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .timeline-content {
+            flex: 1;
+            background: rgba(255, 255, 255, 0.2);
+            padding: 1rem;
+            border-radius: 8px;
+        }
+
+        .timeline-content h5 {
+            font-size: 14px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 0.25rem;
+        }
+
+        .timeline-content p {
+            font-size: 12px;
+            color: #666;
+            margin: 0;
+        }
+
+        /* Animations */
+        @keyframes levelGlow {
+            from { box-shadow: 0 0 20px rgba(255, 215, 0, 0.4); }
+            to { box-shadow: 0 0 30px rgba(255, 215, 0, 0.8); }
+        }
+
+        @keyframes goldGlow {
+            from { box-shadow: 0 4px 12px rgba(255, 215, 0, 0.2); }
+            to { box-shadow: 0 4px 20px rgba(255, 215, 0, 0.5); }
+        }
+
+        @keyframes shimmer {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
+        }
+
+        @keyframes celebration {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+
+        .celebration {
+            animation: celebration 0.6s ease-in-out;
+        }
+
+        /* Confetti Effect */
+        .confetti {
+            position: fixed;
+            width: 10px;
+            height: 10px;
+            background: var(--gold);
+            animation: confetti-fall 3s linear forwards;
+            z-index: 1000;
+        }
+
+        @keyframes confetti-fall {
+            0% {
+                transform: translateY(-100vh) rotate(0deg);
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(100vh) rotate(720deg);
+                opacity: 0;
+            }
+        }
+
+        /* Responsive Design */
+        @media (max-width: 1200px) {
+            .level-display {
+                flex-direction: column;
+                gap: 1rem;
+            }
+            
+            .level-progress {
+                width: 250px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .sidebar {
+                transform: translateX(-100%);
+                transition: transform 0.3s ease;
+            }
+
+            .main-content {
+                margin-left: 0;
+                padding: 1rem;
+            }
+
+            .achievements-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .category-tabs {
+                overflow-x: scroll;
+                scrollbar-width: none;
+                -ms-overflow-style: none;
+            }
+
+            .category-tabs::-webkit-scrollbar {
+                display: none;
+            }
+
+            .filter-controls {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .search-box {
+                width: 100%;
+            }
+
+            .level-badge {
+                width: 100px;
+                height: 100px;
+            }
+
+            .level-number {
+                font-size: 28px;
+            }
+
+            .hero-section {
+                padding: 1.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="dashboard-container">
+        <!-- Sidebar -->
+        <div class="sidebar">
+            <div class="logo">
+                <i class="fas fa-chart-line"></i>
+                <h2>HabitHub</h2>
+            </div>
+            <div class="nav-links">
+                <a href="dashboard.html">
+                    <i class="fas fa-home"></i>
+                    Dashboard
+                </a>
+                <a href="calender.html">
+                    <i class="fas fa-calendar-alt"></i>
+                    Calendar View
+                </a>
+                <a href="habits.html">
+                    <i class="fas fa-list-check"></i>
+                    Your Habits
+                </a>
+                <a href="analytics.html">
+                    <i class="fas fa-chart-bar"></i>
+                    Analytics
+                </a>
+                <a href="achievements.html" class="active">
+                    <i class="fas fa-trophy"></i>
+                    Achievements
+                </a>
+                <a href="profile.html">
+                    <i class="fas fa-user"></i>
+                    Profile
+                </a>
+                <a href="#" onclick="handleLogout(event)">
+                    <i class="fas fa-sign-out-alt"></i>
+                    Logout
+                </a>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <!-- Hero Section -->
+            <div class="hero-section">
+                <div class="level-display">
+                    <div class="level-badge">
+                        <div class="level-number">15</div>
+                        <div class="level-title">Habit Hero</div>
+                    </div>
+                    <div class="level-info">
+                        <h2>Level 15 - Habit Hero</h2>
+                        <p>You're crushing your goals! Keep up the amazing work.</p>
+                        <div class="level-progress">
+                            <div class="progress-fill" style="width: 65%;"></div>
+                        </div>
+                        <div class="xp-info">2,650 / 4,000 XP to next level</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Stats Grid -->
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <h3>23</h3>
+                    <p>Total Achievements</p>
+                </div>
+                <div class="stat-card">
+                    <h3>2,650</h3>
+                    <p>Total XP Points</p>
+                </div>
+                <div class="stat-card">
+                    <h3>🔥 12</h3>
+                    <p>Current Streak</p>
+                </div>
+                <div class="stat-card">
+                    <h3>Epic</h3>
+                    <p>Rarest Achievement</p>
+                </div>
+            </div>
+
+            <!-- Category Tabs -->
+            <div class="category-tabs">
+                <button class="category-tab active" data-category="all">
+                    <i class="fas fa-star"></i>
+                    All Achievements
+                </button>
+                <button class="category-tab" data-category="streaks">
+                    <i class="fas fa-fire"></i>
+                    Streaks
+                </button>
+                <button class="category-tab" data-category="progress">
+                    <i class="fas fa-chart-line"></i>
+                    Progress
+                </button>
+                <button class="category-tab" data-category="perfection">
+                    <i class="fas fa-bullseye"></i>
+                    Perfection
+                </button>
+                <button class="category-tab" data-category="consistency">
+                    <i class="fas fa-calendar-check"></i>
+                    Consistency
+                </button>
+                <button class="category-tab" data-category="categories">
+                    <i class="fas fa-tags"></i>
+                    Categories
+                </button>
+                <button class="category-tab" data-category="special">
+                    <i class="fas fa-gem"></i>
+                    Special
+                </button>
+            </div>
+
+            <!-- Filter Controls -->
+            <div class="filter-controls">
+                <div class="filter-buttons">
+                    <button class="filter-btn active" data-filter="all">All</button>
+                    <button class="filter-btn" data-filter="earned">Earned</button>
+                    <button class="filter-btn" data-filter="in-progress">In Progress</button>
+                    <button class="filter-btn" data-filter="locked">Locked</button>
+                </div>
+                <input type="text" class="search-box" placeholder="Search achievements..." id="searchAchievements">
+            </div>
+
+            <!-- Achievements Grid -->
+            <div class="achievements-grid" id="achievementsGrid">
+                <!-- Achievements will be populated by JavaScript -->
+            </div>
+
+            <!-- Recent Achievements Timeline -->
+            <div class="recent-achievements">
+                <h3>
+                    <i class="fas fa-clock"></i>
+                    Recent Achievements
+                </h3>
+                <div class="timeline">
+                    <div class="timeline-item">
+                        <div class="timeline-icon gold">
+                            <i class="fas fa-fire"></i>
+                        </div>
+                        <div class="timeline-content">
+                            <h5>Habit Warrior - 7 Day Streak</h5>
+                            <p>Earned 2 days ago - 150 XP</p>
+                        </div>
+                    </div>
+                    <div class="timeline-item">
+                        <div class="timeline-icon silver">
+                            <i class="fas fa-star"></i>
+                        </div>
+                        <div class="timeline-content">
+                            <h5>Perfect Day</h5>
+                            <p>Earned 5 days ago - 100 XP</p>
+                        </div>
+                    </div>
+                    <div class="timeline-item">
+                        <div class="timeline-icon bronze">
+                            <i class="fas fa-tint"></i>
+                        </div>
+                        <div class="timeline-content">
+                            <h5>Health Hero - 50 Health Habits</h5>
+                            <p>Earned 1 week ago - 200 XP</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Achievement data structure
+        const achievementsData = {
+            streaks: [
+                {
+                    id: 'fire_starter',
+                    name: 'Fire Starter',
+                    description: 'Complete habits for 3 consecutive days',
+                    icon: 'fas fa-fire',
+                    rarity: 'common',
+                    points: 50,
+                    progress: 100,
+                    maxProgress: 3,
+                    earned: true,
+                    earnedDate: '2025-01-10'
+                },
+                {
+                    id: 'habit_warrior',
+                    name: 'Habit Warrior',
+                    description: 'Maintain a 7-day streak',
+                    icon: 'fas fa-sword',
+                    rarity: 'rare',
+                    points: 150,
+                    progress: 100,
+                    maxProgress: 7,
+                    earned: true,
+                    earnedDate: '2025-01-14'
+                },
+                {
+                    id: 'consistency_king',
+                    name: 'Consistency King',
+                    description: 'Achieve a 14-day streak',
+                    icon: 'fas fa-crown',
+                    rarity: 'epic',
+                    points: 300,
+                    progress: 12,
+                    maxProgress: 14,
+                    earned: false
+                },
+                {
+                    id: 'unstoppable_force',
+                    name: 'Unstoppable Force',
+                    description: 'Reach a 30-day streak',
+                    icon: 'fas fa-rocket',
+                    rarity: 'legendary',
+                    points: 500,
+                    progress: 12,
+                    maxProgress: 30,
+                    earned: false
+                }
+            ],
+            progress: [
+                {
+                    id: 'first_steps',
+                    name: 'First Steps',
+                    description: 'Complete your first habit',
+                    icon: 'fas fa-baby',
+                    rarity: 'common',
+                    points: 25,
+                    progress: 100,
+                    maxProgress: 1,
+                    earned: true,
+                    earnedDate: '2025-01-11'
+                },
+                {
+                    id: 'perfect_week',
+                    name: 'Perfect Week',
+                    description: 'Maintain 100% completion for 7 consecutive days',
+                    icon: 'fas fa-calendar-week',
+                    rarity: 'epic',
+                    points: 350,
+                    progress: 3,
+                    maxProgress: 7,
+                    earned: false
+                },
+                {
+                    id: 'perfect_month',
+                    name: 'Perfect Month',
+                    description: 'Achieve 100% completion for an entire month',
+                    icon: 'fas fa-medal',
+                    rarity: 'legendary',
+                    points: 1000,
+                    progress: 0,
+                    maxProgress: 30,
+                    earned: false
+                }
+            ],
+            consistency: [
+                {
+                    id: 'weekly_warrior',
+                    name: 'Weekly Warrior',
+                    description: 'Complete habits for 7 consecutive days',
+                    icon: 'fas fa-shield-alt',
+                    rarity: 'rare',
+                    points: 150,
+                    progress: 100,
+                    maxProgress: 7,
+                    earned: true,
+                    earnedDate: '2025-01-14'
+                },
+                {
+                    id: 'monthly_master',
+                    name: 'Monthly Master',
+                    description: 'Stay active for 30 days in a month',
+                    icon: 'fas fa-calendar-alt',
+                    rarity: 'epic',
+                    points: 300,
+                    progress: 16,
+                    maxProgress: 30,
+                    earned: false
+                }
+            ],
+            categories: [
+                {
+                    id: 'health_hero',
+                    name: 'Health Hero',
+                    description: 'Complete 50 health-related habits',
+                    icon: 'fas fa-heart',
+                    rarity: 'rare',
+                    points: 200,
+                    progress: 100,
+                    maxProgress: 50,
+                    earned: true,
+                    earnedDate: '2025-01-08'
+                },
+                {
+                    id: 'learning_legend',
+                    name: 'Learning Legend',
+                    description: 'Complete 30 learning sessions',
+                    icon: 'fas fa-graduation-cap',
+                    rarity: 'rare',
+                    points: 200,
+                    progress: 25,
+                    maxProgress: 30,
+                    earned: false
+                },
+                {
+                    id: 'lifestyle_leader',
+                    name: 'Lifestyle Leader',
+                    description: 'Complete 40 lifestyle habits',
+                    icon: 'fas fa-running',
+                    rarity: 'rare',
+                    points: 200,
+                    progress: 32,
+                    maxProgress: 40,
+                    earned: false
+                },
+                {
+                    id: 'mindfulness_master',
+                    name: 'Mindfulness Master',
+                    description: 'Complete 25 meditation sessions',
+                    icon: 'fas fa-leaf',
+                    rarity: 'epic',
+                    points: 250,
+                    progress: 18,
+                    maxProgress: 25,
+                    earned: false
+                }
+            ]
+        };
+
+        // Current filter and category
+        let currentCategory = 'all';
+        let currentFilter = 'all';
+
+        // Initialize achievements page
+        function initAchievements() {
+            renderAchievements();
+            setupEventListeners();
+            animateProgressBars();
+        }
+
+        // Render achievements based on current filters
+        function renderAchievements() {
+            const grid = document.getElementById('achievementsGrid');
+            grid.innerHTML = '';
+
+            let achievements = [];
+            
+            // Get achievements based on category
+            if (currentCategory === 'all') {
+                achievements = Object.values(achievementsData).flat();
+            } else {
+                achievements = achievementsData[currentCategory] || [];
+            }
+
+            // Filter achievements based on status
+            achievements = achievements.filter(achievement => {
+                switch(currentFilter) {
+                    case 'earned':
+                        return achievement.earned;
+                    case 'in-progress':
+                        return !achievement.earned && achievement.progress > 0;
+                    case 'locked':
+                        return !achievement.earned && achievement.progress === 0;
+                    default:
+                        return true;
+                }
+            });
+
+            // Search filter
+            const searchTerm = document.getElementById('searchAchievements').value.toLowerCase();
+            if (searchTerm) {
+                achievements = achievements.filter(achievement => 
+                    achievement.name.toLowerCase().includes(searchTerm) ||
+                    achievement.description.toLowerCase().includes(searchTerm)
+                );
+            }
+
+            // Render achievement cards
+            achievements.forEach(achievement => {
+                const card = createAchievementCard(achievement);
+                grid.appendChild(card);
+            });
+
+            // Animate cards entrance
+            setTimeout(() => {
+                document.querySelectorAll('.achievement-card').forEach((card, index) => {
+                    setTimeout(() => {
+                        card.style.opacity = '1';
+                        card.style.transform = 'translateY(0)';
+                    }, index * 100);
+                });
+            }, 50);
+        }
+
+        // Create achievement card element
+        function createAchievementCard(achievement) {
+            const card = document.createElement('div');
+            card.className = `achievement-card ${achievement.earned ? 'earned' : ''} ${!achievement.earned && achievement.progress === 0 ? 'locked' : ''}`;
+            card.style.opacity = '0';
+            card.style.transform = 'translateY(20px)';
+            card.style.transition = 'all 0.3s ease';
+
+            const progressPercentage = Math.round((achievement.progress / achievement.maxProgress) * 100);
+            const isComplete = achievement.earned;
+
+            card.innerHTML = `
+                <div class="achievement-header">
+                    <div class="achievement-icon ${achievement.rarity}">
+                        <i class="${achievement.icon}"></i>
+                    </div>
+                    <div class="achievement-info">
+                        <h4>${achievement.name}</h4>
+                        <div class="achievement-rarity ${achievement.rarity}">${achievement.rarity}</div>
+                        <div class="achievement-points">
+                            <i class="fas fa-star"></i>
+                            ${achievement.points} XP
+                        </div>
+                    </div>
+                </div>
+                <div class="achievement-description">
+                    ${achievement.description}
+                </div>
+                ${!isComplete ? `
+                    <div class="achievement-progress">
+                        <div class="progress-header">
+                            <span class="progress-text">Progress</span>
+                            <span class="progress-percentage">${progressPercentage}%</span>
+                        </div>
+                        <div class="progress-bar">
+                            <div class="progress-bar-fill ${achievement.rarity}" style="width: ${progressPercentage}%"></div>
+                        </div>
+                    </div>
+                ` : `
+                    <div class="achievement-date">
+                        Earned on ${formatDate(achievement.earnedDate)}
+                    </div>
+                    <button class="share-btn" onclick="shareAchievement('${achievement.id}')">
+                        <i class="fas fa-share"></i> Share Achievement
+                    </button>
+                `}
+            `;
+
+            return card;
+        }
+
+        // Format date for display
+        function formatDate(dateString) {
+            const options = { year: 'numeric', month: 'long', day: 'numeric' };
+            return new Date(dateString).toLocaleDateString('en-US', options);
+        }
+
+        // Setup event listeners
+        function setupEventListeners() {
+            // Category tabs
+            document.querySelectorAll('.category-tab').forEach(tab => {
+                tab.addEventListener('click', () => {
+                    // Update active tab
+                    document.querySelectorAll('.category-tab').forEach(t => t.classList.remove('active'));
+                    tab.classList.add('active');
+                    
+                    // Update current category
+                    currentCategory = tab.getAttribute('data-category');
+                    renderAchievements();
+                });
+            });
+
+            // Filter buttons
+            document.querySelectorAll('.filter-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    // Update active filter
+                    document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+                    
+                    // Update current filter
+                    currentFilter = btn.getAttribute('data-filter');
+                    renderAchievements();
+                });
+            });
+
+            // Search input
+            document.getElementById('searchAchievements').addEventListener('input', () => {
+                renderAchievements();
+            });
+        }
+
+        // Animate progress bars
+        function animateProgressBars() {
+            setTimeout(() => {
+                document.querySelectorAll('.progress-fill').forEach(bar => {
+                    const width = bar.style.width;
+                    bar.style.width = '0%';
+                    setTimeout(() => {
+                        bar.style.width = width;
+                    }, 500);
+                });
+            }, 1000);
+        }
+
+        // Share achievement function
+        function shareAchievement(achievementId) {
+            const achievement = Object.values(achievementsData).flat().find(a => a.id === achievementId);
+            if (!achievement) return;
+
+            // Create share text
+            const shareText = `🏆 I just earned the "${achievement.name}" achievement in HabitHub! ${achievement.description} #HabitHub #Achievement`;
+            
+            // Try to use Web Share API if available
+            if (navigator.share) {
+                navigator.share({
+                    title: `HabitHub Achievement: ${achievement.name}`,
+                    text: shareText,
+                    url: window.location.href
+                }).catch(console.error);
+            } else {
+                // Fallback to clipboard
+                navigator.clipboard.writeText(shareText).then(() => {
+                    showNotification('Achievement copied to clipboard!');
+                }).catch(() => {
+                    // Fallback for older browsers
+                    const textArea = document.createElement('textarea');
+                    textArea.value = shareText;
+                    document.body.appendChild(textArea);
+                    textArea.select();
+                    document.execCommand('copy');
+                    document.body.removeChild(textArea);
+                    showNotification('Achievement copied to clipboard!');
+                });
+            }
+        }
+
+        // Show notification
+        function showNotification(message) {
+            const notification = document.createElement('div');
+            notification.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                background: var(--mindfulness-color);
+                color: white;
+                padding: 1rem 1.5rem;
+                border-radius: 8px;
+                font-weight: 500;
+                z-index: 1000;
+                transform: translateX(100%);
+                transition: transform 0.3s ease;
+            `;
+            notification.textContent = message;
+            
+            document.body.appendChild(notification);
+            
+            setTimeout(() => {
+                notification.style.transform = 'translateX(0)';
+            }, 100);
+            
+            setTimeout(() => {
+                notification.style.transform = 'translateX(100%)';
+                setTimeout(() => {
+                    document.body.removeChild(notification);
+                }, 300);
+            }, 3000);
+        }
+
+        // Simulate achievement unlock (for demo purposes)
+        function unlockAchievement(achievementId) {
+            const achievement = Object.values(achievementsData).flat().find(a => a.id === achievementId);
+            if (!achievement || achievement.earned) return;
+
+            // Mark as earned
+            achievement.earned = true;
+            achievement.progress = achievement.maxProgress;
+            achievement.earnedDate = new Date().toISOString().split('T')[0];
+
+            // Create celebration effect
+            createCelebration();
+            
+            // Show achievement unlock notification
+            showAchievementUnlock(achievement);
+            
+            // Re-render achievements
+            setTimeout(() => {
+                renderAchievements();
+            }, 2000);
+        }
+
+        // Create celebration effect
+        function createCelebration() {
+            // Create confetti
+            for (let i = 0; i < 50; i++) {
+                setTimeout(() => {
+                    createConfetti();
+                }, i * 50);
+            }
+            
+            // Add celebration class to level badge
+            const levelBadge = document.querySelector('.level-badge');
+            levelBadge.classList.add('celebration');
+            setTimeout(() => {
+                levelBadge.classList.remove('celebration');
+            }, 600);
+        }
+
+        // Create confetti piece
+        function createConfetti() {
+            const confetti = document.createElement('div');
+            confetti.className = 'confetti';
+            confetti.style.left = Math.random() * window.innerWidth + 'px';
+            confetti.style.background = ['#ffd700', '#ff6b6b', '#4ecdc4', '#45b7d1', '#96ceb4'][Math.floor(Math.random() * 5)];
+            confetti.style.animationDelay = Math.random() * 2 + 's';
+            
+            document.body.appendChild(confetti);
+            
+            setTimeout(() => {
+                document.body.removeChild(confetti);
+            }, 3000);
+        }
+
+        // Show achievement unlock notification
+        function showAchievementUnlock(achievement) {
+            const modal = document.createElement('div');
+            modal.style.cssText = `
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background: rgba(0, 0, 0, 0.8);
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                z-index: 2000;
+                animation: fadeIn 0.3s ease;
+            `;
+            
+            modal.innerHTML = `
+                <div style="
+                    background: white;
+                    border-radius: 20px;
+                    padding: 3rem;
+                    text-align: center;
+                    max-width: 400px;
+                    animation: slideUp 0.3s ease;
+                ">
+                    <div style="
+                        width: 100px;
+                        height: 100px;
+                        background: linear-gradient(135deg, var(--gold), #ffed4e);
+                        border-radius: 50%;
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                        font-size: 36px;
+                        margin: 0 auto 2rem;
+                        box-shadow: 0 0 30px rgba(255, 215, 0, 0.4);
+                        animation: levelGlow 2s ease-in-out infinite alternate;
+                    ">
+                        <i class="${achievement.icon}"></i>
+                    </div>
+                    <h2 style="color: #333; margin-bottom: 1rem; font-size: 24px;">🎉 Achievement Unlocked!</h2>
+                    <h3 style="color: var(--mindfulness-color); margin-bottom: 0.5rem;">${achievement.name}</h3>
+                    <p style="color: #666; margin-bottom: 1.5rem;">${achievement.description}</p>
+                    <p style="color: var(--gold); font-weight: 600; font-size: 18px;">+${achievement.points} XP</p>
+                    <button onclick="this.parentElement.parentElement.remove()" style="
+                        background: linear-gradient(135deg, #8b5cf6, #3b82f6);
+                        color: white;
+                        border: none;
+                        padding: 0.75rem 2rem;
+                        border-radius: 8px;
+                        margin-top: 1rem;
+                        cursor: pointer;
+                        font-weight: 500;
+                    ">Awesome!</button>
+                </div>
+            `;
+            
+            document.body.appendChild(modal);
+            
+            // Auto-close after 5 seconds
+            setTimeout(() => {
+                if (document.body.contains(modal)) {
+                    document.body.removeChild(modal);
+                }
+            }, 5000);
+        }
+
+        // Demo function to unlock achievements (for testing)
+        function demoUnlockAchievement() {
+            const unlockedAchievements = Object.values(achievementsData).flat().filter(a => !a.earned);
+            if (unlockedAchievements.length > 0) {
+                const randomAchievement = unlockedAchievements[Math.floor(Math.random() * unlockedAchievements.length)];
+                unlockAchievement(randomAchievement.id);
+            }
+        }
+
+        // Add additional CSS animations
+        const additionalStyles = document.createElement('style');
+        additionalStyles.textContent = `
+            @keyframes fadeIn {
+                from { opacity: 0; }
+                to { opacity: 1; }
+            }
+            
+            @keyframes slideUp {
+                from { transform: translateY(50px); opacity: 0; }
+                to { transform: translateY(0); opacity: 1; }
+            }
+        `;
+        document.head.appendChild(additionalStyles);
+
+        // Initialize when DOM is loaded
+        document.addEventListener('DOMContentLoaded', () => {
+            initAchievements();
+            
+            // Demo: Add click handler to level badge for testing achievement unlock
+            document.querySelector('.level-badge').addEventListener('click', () => {
+                demoUnlockAchievement();
+            });
+        });
+
+        // Update stats based on achievements data
+        function updateStats() {
+            const allAchievements = Object.values(achievementsData).flat();
+            const earnedAchievements = allAchievements.filter(a => a.earned);
+            const totalXP = earnedAchievements.reduce((sum, a) => sum + a.points, 0);
+            
+            // Find rarest earned achievement
+            const rarityOrder = ['common', 'rare', 'epic', 'legendary'];
+            const rarestAchievement = earnedAchievements.reduce((rarest, current) => {
+                const rarestIndex = rarityOrder.indexOf(rarest?.rarity || 'common');
+                const currentIndex = rarityOrder.indexOf(current.rarity);
+                return currentIndex > rarestIndex ? current : rarest;
+            }, null);
+
+            // Update stat cards
+            document.querySelector('.stat-card:nth-child(1) h3').textContent = earnedAchievements.length;
+            document.querySelector('.stat-card:nth-child(2) h3').textContent = totalXP.toLocaleString();
+            document.querySelector('.stat-card:nth-child(4) h3').textContent = 
+                rarestAchievement ? rarestAchievement.rarity.charAt(0).toUpperCase() + rarestAchievement.rarity.slice(1) : 'None';
+        }
+
+        // Call updateStats after initialization
+        setTimeout(updateStats, 100);
+    </script>
+</body>
+</html>
