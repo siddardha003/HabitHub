@@ -1,6 +1,26 @@
 // Habits data
 let habits = [];
 
+// Track daily visits (server-side)
+async function trackDailyVisit() {
+    try {
+        const response = await fetch('../../includes/track_visit.php', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        });
+        
+        const data = await response.json();
+        if (!data.success) {
+            console.warn('Failed to track visit:', data.message);
+        }
+    } catch (error) {
+        console.warn('Visit tracking error:', error);
+        // Fail silently - visit tracking shouldn't break the app
+    }
+}
+
 // Category icons and colors mapping
 const categoryIcons = {
     health: 'fa-heart',
@@ -630,6 +650,7 @@ async function fetchHabits() {
 
 // Initialize app
 document.addEventListener('DOMContentLoaded', function () {
+    trackDailyVisit(); // Track that user visited today
     updateGreeting();
     updateDate();
     fetchHabits(); // This now has its own check for dashboard page

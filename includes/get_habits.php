@@ -55,8 +55,7 @@ try {
               (SELECT COUNT(*) FROM habit_completions hc 
                WHERE hc.habit_id = h.id 
                AND hc.completion_date >= DATE_SUB(CURDATE(), INTERVAL WEEKDAY(CURDATE()) + 1 DAY)
-               AND hc.completion_date <= DATE_ADD(DATE_SUB(CURDATE(), INTERVAL WEEKDAY(CURDATE()) + 1 DAY), INTERVAL 6 DAY)) as completed_days,
-              (SELECT COALESCE(MAX(streak), 0) FROM habit_streaks hs WHERE hs.habit_id = h.id) as current_streak
+               AND hc.completion_date <= DATE_ADD(DATE_SUB(CURDATE(), INTERVAL WEEKDAY(CURDATE()) + 1 DAY), INTERVAL 6 DAY)) as completed_days
               FROM habits h 
               WHERE h.user_id = ?";
               
@@ -110,12 +109,26 @@ try {
                           ORDER BY completion_date DESC
                         ) AS max_streak)";
         
-        // For now, let's use a simpler streak calculation
+        // Calculate current streak properly
         $currentStreak = 0;
         $today = date('Y-m-d');
-        $checkDate = $today;
         
-        // Check consecutive days backwards from today
+        // Check if today is completed
+        $todayQuery = "SELECT COUNT(*) as count FROM habit_completions WHERE habit_id = ? AND completion_date = ?";
+        $todayStmt = $conn->prepare($todayQuery);
+        $todayStmt->execute([$row['id'], $today]);
+        $todayResult = $todayStmt->fetch(PDO::FETCH_ASSOC);
+        $todayCompleted = $todayResult['count'] > 0;
+        
+        if ($todayCompleted) {
+            // If today is completed, start from today and count backwards
+            $checkDate = $today;
+        } else {
+            // If today is not completed, start from yesterday to show existing streak
+            $checkDate = date('Y-m-d', strtotime($today . ' -1 day'));
+        }
+        
+        // Check consecutive days backwards
         for ($i = 0; $i < 365; $i++) { // Max 365 days to prevent infinite loop
             $checkQuery = "SELECT COUNT(*) as count FROM habit_completions WHERE habit_id = ? AND completion_date = ?";
             $checkStmt = $conn->prepare($checkQuery);

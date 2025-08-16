@@ -64,11 +64,19 @@ try {
     $stmt = $conn->prepare($query);
     
     if ($stmt->execute([$habitId, $date])) {
-        // Calculate current streak manually (simpler and more reliable)
+        // Calculate current streak after the toggle action
         $currentStreak = 0;
-        $checkDate = $date;
+        $today = date('Y-m-d');
         
-        // Check consecutive days backwards from the given date
+        if ($completed) {
+            // If completing, start from the completion date and count backwards
+            $checkDate = $date;
+        } else {
+            // If uncompleting, start from yesterday to show remaining streak
+            $checkDate = date('Y-m-d', strtotime($date . ' -1 day'));
+        }
+        
+        // Count consecutive days backwards
         for ($i = 0; $i < 365; $i++) { // Max 365 days to prevent infinite loop
             $checkQuery = "SELECT COUNT(*) as count FROM habit_completions WHERE habit_id = ? AND completion_date = ?";
             $checkStmt = $conn->prepare($checkQuery);

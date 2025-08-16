@@ -96,11 +96,16 @@ function updateGlobalStreak($userId, $date = null) {
             $lastCompletionDate = $date;
         } else {
             // Not all habits completed
-            if ($lastCompletionDate && $lastCompletionDate !== $date) {
-                // Different day and not all completed - reset streak
+            $today = date('Y-m-d');
+            
+            if ($date === $today) {
+                // Today - don't reset streak yet, user might still complete remaining habits
+                // Keep current streak as is (maintain existing streak)
+            } else {
+                // Past day and not all completed - reset streak to 0
                 $currentStreak = 0;
+                $lastCompletionDate = null; // Clear last completion date
             }
-            // If same day, keep current streak (might be partially completed)
         }
         
         // Update streak record

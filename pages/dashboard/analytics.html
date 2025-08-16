@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HabitHub - Analytics</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="icon" href="../../assets/img/HabitHub-logo.png">
+    <link rel="stylesheet" href="../../assets/css/dashboard.css">
+    <link rel="stylesheet" href="../../assets/css/analytics.css">
+</head>
+
+<body>
+    <div class="dashboard-container">
+        <!-- Sidebar -->
+        <div class="sidebar">
+            <div class="logo">
+                <img src="../../assets/img/HabitHub-logo.png" alt="HabitHub Logo" class="logo-img" style="height: 40px;">
+                <h2>HabitHub</h2>
+            </div>
+            <div class="nav-links">
+                <a href="dashboard.html">
+                    <i class="fas fa-home"></i>
+                    Dashboard
+                </a>
+                <a href="habits.html">
+                    <i class="fas fa-list-check"></i>
+                    Your Habits
+                </a>
+                <a href="calender.html">
+                    <i class="fas fa-calendar-alt"></i>
+                    Calendar View
+                </a>
+                <a href="analytics.html" class="active">
+                    <i class="fas fa-chart-bar"></i>
+                    Analytics
+                </a>
+                <a href="#">
+                    <i class="fas fa-trophy"></i>
+                    Achievements
+                </a>
+                <a href="#">
+                    <i class="fas fa-users"></i>
+                    Challenges
+                </a>
+                <a href="#">
+                    <i class="fas fa-cog"></i>
+                    Settings
+                </a>
+                <a href="#" onclick="handleLogout(event)">
+                    <i class="fas fa-sign-out-alt"></i>
+                    Logout
+                </a>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <!-- Mobile Menu Toggle -->
+            <button class="mobile-menu-toggle" onclick="toggleSidebar()">
+                <i class="fas fa-bars"></i>
+            </button>
+
+            <!-- Header -->
+            <div class="dashboard-header">
+                <div class="greeting-section">
+                    <h1 id="greeting">Analytics Dashboard</h1>
+                    <div class="date" id="currentDate"></div>
+                </div>
+                <div class="header-icons">
+                    <i class="fas fa-bell" title="Notifications"></i>
+                    <div class="profile-icon" title="Profile">
+                        A
+                    </div>
+                </div>
+            </div>
+
+            <!-- Loading State -->
+            <div class="loading-state" id="loadingState" style="display: none;">
+                <div class="loading-spinner"></div>
+                <p>Loading analytics data...</p>
+            </div>
+
+            <!-- Analytics Content -->
+            <div class="analytics-content" id="analyticsContent">
+                <!-- Overview Stats -->
+                <div class="stats-overview">
+                    <h2>Overview</h2>
+                    <div class="stats-grid">
+                        <div class="stat-card">
+                            <div class="stat-icon">
+                                <i class="fas fa-list-check"></i>
+                            </div>
+                            <div class="stat-info">
+                                <h3 id="totalHabits">0</h3>
+                                <p>Total Habits</p>
+                            </div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon">
+                                <i class="fas fa-percentage"></i>
+                            </div>
+                            <div class="stat-info">
+                                <h3 id="overallRate">0%</h3>
+                                <p>Overall Success Rate</p>
+                            </div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon">
+                                <i class="fas fa-fire"></i>
+                            </div>
+                            <div class="stat-info">
+                                <h3 id="currentStreak">0</h3>
+                                <p>Current Streak</p>
+                            </div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon">
+                                <i class="fas fa-trophy"></i>
+                            </div>
+                            <div class="stat-info">
+                                <h3 id="bestStreak">0</h3>
+                                <p>Best Streak</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Charts Section -->
+                <div class="charts-section">
+                    <div class="chart-row">
+                        <!-- Progress Chart with Dropdown -->
+                        <div class="chart-card">
+                            <div class="chart-header">
+                                <div class="chart-title-section">
+                                    <div>
+                                        <h3 id="progressChartTitle">Weekly Progress</h3>
+                                        <p id="progressChartDescription">Your completion rate over the last 8 weeks</p>
+                                    </div>
+                                    <div class="chart-controls">
+                                        <select id="progressPeriod" class="form-select" onchange="updateProgressChart()">
+                                            <option value="weekly">Weekly</option>
+                                            <option value="monthly">Monthly</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="chart-container">
+                                <canvas id="progressChart"></canvas>
+                            </div>
+                        </div>
+
+                        <!-- Habit Performance Chart -->
+                        <div class="chart-card">
+                            <div class="chart-header">
+                                <h3>Habit Performance</h3>
+                                <p>Success rate by habit</p>
+                            </div>
+                            <div class="chart-container">
+                                <canvas id="habitChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="chart-row">
+                        <!-- Days of Week Analysis -->
+                        <div class="chart-card">
+                            <div class="chart-header">
+                                <h3>Best Days of Week</h3>
+                                <p>Which days you perform best</p>
+                            </div>
+                            <div class="chart-container">
+                                <canvas id="daysChart"></canvas>
+                            </div>
+                        </div>
+
+                        <!-- Category Performance -->
+                        <div class="chart-card">
+                            <div class="chart-header">
+                                <h3>Category Performance</h3>
+                                <p>Success rate by category</p>
+                            </div>
+                            <div class="chart-container">
+                                <canvas id="categoryChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Insights Section -->
+                <div class="insights-section">
+                    <div class="insights-row">
+                        <!-- Top Performing Habits -->
+                        <div class="insight-card">
+                            <div class="insight-header">
+                                <h3><i class="fas fa-star"></i> Top Performing Habits</h3>
+                            </div>
+                            <div class="insight-content" id="topHabits">
+                                <!-- Dynamic content -->
+                            </div>
+                        </div>
+
+                        <!-- Monthly Summary -->
+                        <div class="insight-card">
+                            <div class="insight-header">
+                                <h3><i class="fas fa-calendar"></i> This Month</h3>
+                            </div>
+                            <div class="insight-content" id="monthlySummary">
+                                <!-- Dynamic content -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="../../assets/js/dashboard.js"></script>
+    <script src="../../assets/js/analytics.js"></script>
+</body>
+
+</html>
