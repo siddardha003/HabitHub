@@ -33,6 +33,9 @@ if($user->emailExists()) {
         $_SESSION['user_id'] = $user->id;
         $_SESSION['username'] = $user->username;
         
+        // Track login day
+        trackLoginDay($user->id, $db);
+        
         http_response_code(200);
         echo json_encode(array(
             "message" => "Login successful",
@@ -46,5 +49,37 @@ if($user->emailExists()) {
 } else {
     http_response_code(404);
     echo json_encode(array("message" => "Email not found."));
+}
+
+// Function to track login day
+function trackLoginDay($user_id, $db) {
+    try {
+        $today = date('Y-m-d');
+        
+        // Check if user already logged in today
+        $query = "SELECT id FROM user_login_days WHERE user_id = ? AND login_date = ?";
+        $stmt = $db->prepare($query);
+        $stmt->bindParam(1, $user_id);
+        $stmt->bindParam(2, $today);
+        $stmt->execute();
+        
+        // If no record for today, insert it
+        if ($stmt->rowCount() == 0) {
+            $query = "INSERT INTO user_login_days (user_id, login_date) VALUES (?, ?)";
+            $stmt = $db->prepare($query);
+            $stmt->bindParam(1, $user_id);
+            $stmt->bindParam(2, $today);
+            $stmt->execute();
+        }
+        
+        // Also update last_login in users table
+        $query = "UPDATE users SET last_login = NOW() WHERE id = ?";
+        $stmt = $db->prepare($query);
+        $stmt->bindParam(1, $user_id);
+        $stmt->execute();
+        
+    } catch (PDOException $e) {
+        error_log("Error tracking login day: " . $e->getMessage());
+    }
 }
 ?>
