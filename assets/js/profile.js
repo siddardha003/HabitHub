@@ -8,7 +8,6 @@ document.addEventListener('DOMContentLoaded', function () {
     loadUserAvatar();
 });
 
-// Load user profile data
 async function loadUserProfile() {
     try {
         const response = await fetch('../../includes/get_user_data.php');
@@ -16,7 +15,8 @@ async function loadUserProfile() {
 
         if (data.success) {
             const user = data.user;
-
+            const userName = data.user.name;
+            
             document.getElementById('profileName').textContent = user.name || 'User';
             document.getElementById('profileEmail').textContent = user.email || '';
             document.getElementById('joinDate').textContent = 'Member since ' + formatDate(user.created_at);
@@ -28,6 +28,11 @@ async function loadUserProfile() {
             loadActiveDays();
             document.getElementById('totalHabits').textContent = user.total_habits || 0;
             document.getElementById('longestStreak').textContent = user.longest_streak || 0;
+
+            const profileIcon = document.querySelector('.profile-icon');
+            if (profileIcon) {
+                profileIcon.textContent = userName.charAt(0).toUpperCase();
+            }
 
         } else {
             document.getElementById('profileName').textContent = 'User';
@@ -41,6 +46,12 @@ async function loadUserProfile() {
         document.getElementById('profileName').textContent = 'User';
         document.getElementById('profileEmail').textContent = 'user@example.com';
         document.getElementById('joinDate').textContent = 'Member since Today';
+
+        const profileIcon = document.querySelector('.profile-icon');
+        if (profileIcon) {
+            profileIcon.textContent = 'G';
+        }
+
         // Load active days separately
         loadActiveDays();
     }
@@ -85,7 +96,7 @@ async function loadActiveDays() {
     try {
         const response = await fetch('../../includes/get_login_days.php');
         const data = await response.json();
-        
+
         if (data.success) {
             document.getElementById('memberSince').textContent = data.active_days || 0;
         } else {
