@@ -238,7 +238,7 @@ function createMonthDayElement(day, isOtherMonth, month) {
         const dateKey = formatDateKey(currentDate.getFullYear(), month, day);
         const dayCompletions = calendarData.completions[dateKey] || {};
 
-        const { indicators, completionRate } = createHabitIndicators(dayCompletions);
+        const { indicators, completionRate } = createHabitIndicators(dayCompletions, dateKey);
         dayElement.appendChild(indicators);
 
         const completionBar = createCompletionBar(completionRate);
@@ -288,7 +288,7 @@ function generateWeekView() {
         const dailyNote = calendarData.notes[dateKey] || '';
         
         // Calculate completion rate
-        const { indicators, completionRate } = createHabitIndicators(dayCompletions);
+        const { indicators, completionRate } = createHabitIndicators(dayCompletions, dateKey);
         const isPerfectDay = completionRate === 100 && calendarData.habits.length > 0;
         
         // Create day card
@@ -322,7 +322,7 @@ function generateWeekView() {
             
             <div class="week-day-content">
                 <div class="week-habit-indicators">
-                    ${generateWeekHabitDots(dayCompletions)}
+                    ${generateWeekHabitDots(dayCompletions, dateKey)}
                 </div>
                 
                 <div class="week-completion-bar">
@@ -347,20 +347,33 @@ function generateWeekView() {
 }
 
 // Generate habit dots for week view
-function generateWeekHabitDots(dayCompletions) {
+function generateWeekHabitDots(dayCompletions, dateKey) {
     let dotsHTML = '';
+    
+    // Convert dateKey to Date object for comparison
+    const displayDate = new Date(dateKey);
     
     calendarData.habits.forEach(habit => {
         if (visibleHabits[habit.id]) {
-            const isCompleted = dayCompletions[habit.id] || false;
-            const dotClass = isCompleted ? '' : 'incomplete';
+            // Check if habit was created on or before this date
+            const habitCreatedDate = new Date(habit.created_at);
             
-            dotsHTML += `
-                <div class="week-habit-dot ${habit.category} ${dotClass}" 
-                     style="background: ${isCompleted ? (categoryColors[habit.category] || '#666') : 'transparent'}"
-                     title="${habit.name}">
-                </div>
-            `;
+            // Compare only the date parts (ignore time)
+            const habitDateOnly = new Date(habitCreatedDate.getFullYear(), habitCreatedDate.getMonth(), habitCreatedDate.getDate());
+            const displayDateOnly = new Date(displayDate.getFullYear(), displayDate.getMonth(), displayDate.getDate());
+            
+            // Only show habit if it existed on this date
+            if (habitDateOnly <= displayDateOnly) {
+                const isCompleted = dayCompletions[habit.id] || false;
+                const dotClass = isCompleted ? '' : 'incomplete';
+                
+                dotsHTML += `
+                    <div class="week-habit-dot ${habit.category} ${dotClass}" 
+                         style="background: ${isCompleted ? (categoryColors[habit.category] || '#666') : 'transparent'}"
+                         title="${habit.name}">
+                    </div>
+                `;
+            }
         }
     });
     
@@ -396,29 +409,57 @@ function generateWeekHabits(dayCompletions) {
 }
 
 // Create habit indicators for month view
-function createHabitIndicators(completions) {
+function createHabitIndicators(completions, dateKey) {
     const indicators = document.createElement('div');
     indicators.className = 'habit-indicators';
 
     let completed = 0;
     let total = 0;
 
+    // Convert dateKey to Date object for comparison
+    const displayDate = new Date(dateKey);
+
+    // Debug logging for specific dates
+    if (dateKey === '2025-08-17' || dateKey === '2025-08-24') {
+        console.log(`Debug for ${dateKey}:`, {
+            displayDate: displayDate,
+            totalHabits: calendarData.habits.length,
+            habits: calendarData.habits.map(h => ({
+                id: h.id,
+                name: h.name,
+                created_at: h.created_at,
+                createdDate: new Date(h.created_at),
+                willShow: new Date(h.created_at) <= displayDate
+            }))
+        });
+    }
+
     calendarData.habits.forEach(habit => {
         if (visibleHabits[habit.id]) {
-            const dot = document.createElement('div');
-            dot.className = `habit-dot ${habit.category}`;
-            dot.style.background = categoryColors[habit.category] || '#666';
+            // Check if habit was created on or before this date
+            const habitCreatedDate = new Date(habit.created_at);
+            
+            // Compare only the date parts (ignore time)
+            const habitDateOnly = new Date(habitCreatedDate.getFullYear(), habitCreatedDate.getMonth(), habitCreatedDate.getDate());
+            const displayDateOnly = new Date(displayDate.getFullYear(), displayDate.getMonth(), displayDate.getDate());
+            
+            // Only show habit if it existed on this date
+            if (habitDateOnly <= displayDateOnly) {
+                const dot = document.createElement('div');
+                dot.className = `habit-dot ${habit.category}`;
+                dot.style.background = categoryColors[habit.category] || '#666';
 
-            if (completions[habit.id]) {
-                completed++;
-            } else {
-                dot.classList.add('incomplete');
-                dot.style.background = 'transparent';
-                dot.style.border = `1px solid ${categoryColors[habit.category] || '#ccc'}`;
+                if (completions[habit.id]) {
+                    completed++;
+                } else {
+                    dot.classList.add('incomplete');
+                    dot.style.background = 'transparent';
+                    dot.style.border = `1px solid ${categoryColors[habit.category] || '#ccc'}`;
+                }
+                total++;
+
+                indicators.appendChild(dot);
             }
-            total++;
-
-            indicators.appendChild(dot);
         }
     });
 
@@ -459,29 +500,39 @@ function showDayDetail(year, month, day) {
     const modalHabits = document.getElementById('modalHabits');
     modalHabits.innerHTML = '';
 
-    // Add habits
+    // Add habits (only show habits that existed on this date)
     calendarData.habits.forEach(habit => {
-        const habitItem = document.createElement('div');
-        habitItem.className = 'modal-habit-item';
+        // Check if habit was created on or before this date
+        const habitCreatedDate = new Date(habit.created_at);
+        
+        // Compare only the date parts (ignore time)
+        const habitDateOnly = new Date(habitCreatedDate.getFullYear(), habitCreatedDate.getMonth(), habitCreatedDate.getDate());
+        const selectedDateOnly = new Date(selectedDate.getFullYear(), selectedDate.getMonth(), selectedDate.getDate());
+        
+        // Only show habit if it existed on this date
+        if (habitDateOnly <= selectedDateOnly) {
+            const habitItem = document.createElement('div');
+            habitItem.className = 'modal-habit-item';
 
-        const isCompleted = completions[habit.id] || false;
+            const isCompleted = completions[habit.id] || false;
 
-        habitItem.innerHTML = `
-            <div class="habit-icon-modal" style="background: ${categoryColors[habit.category] || '#666'}">
-                <i class="fas ${habit.icon}"></i>
-            </div>
-            <div class="modal-habit-info">
-                <h4>${habit.name}</h4>
-                <span>${habit.category}</span>
-            </div>
-            <div class="habit-status">
-                <div class="status-icon ${isCompleted ? 'completed' : 'incomplete'}">
-                    <i class="fas fa-${isCompleted ? 'check' : 'times'}"></i>
+            habitItem.innerHTML = `
+                <div class="habit-icon-modal" style="background: ${categoryColors[habit.category] || '#666'}">
+                    <i class="fas ${habit.icon}"></i>
                 </div>
-            </div>
-        `;
+                <div class="modal-habit-info">
+                    <h4>${habit.name}</h4>
+                    <span>${habit.category}</span>
+                </div>
+                <div class="habit-status">
+                    <div class="status-icon ${isCompleted ? 'completed' : 'incomplete'}">
+                        <i class="fas fa-${isCompleted ? 'check' : 'times'}"></i>
+                    </div>
+                </div>
+            `;
 
-        modalHabits.appendChild(habitItem);
+            modalHabits.appendChild(habitItem);
+        }
     });
 
     // Add daily note section
@@ -812,6 +863,8 @@ async function saveDailyNote() {
     if (!currentNoteDate) return;
 
     const noteContent = document.getElementById('dailyNoteText').value.trim();
+    
+    console.log('Saving daily note:', { date: currentNoteDate, noteContent });
 
     try {
         const response = await fetch('../../includes/save_daily_note.php', {
@@ -825,7 +878,23 @@ async function saveDailyNote() {
             })
         });
 
-        const data = await response.json();
+        console.log('Response status:', response.status);
+        
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        const text = await response.text();
+        console.log('Response text:', text);
+        
+        let data;
+        try {
+            data = JSON.parse(text);
+        } catch (e) {
+            console.error('JSON parse error:', e);
+            console.error('Response text:', text);
+            throw new Error('Invalid JSON response from server');
+        }
 
         if (data.success) {
             // Update local data

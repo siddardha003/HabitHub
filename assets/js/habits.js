@@ -66,7 +66,7 @@ function renderHabitsTable() {
 
   habitsData.forEach(habit => {
     const weeklyProgress = Math.round((habit.completedDays / 7) * 100);
-    const createdDate = new Date(habit.created_at || Date.now()).toLocaleDateString('en-US', {
+    const createdDate = new Date(habit.created_at).toLocaleDateString('en-US', {
       year: 'numeric',
       month: 'short',
       day: 'numeric'

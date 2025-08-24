@@ -16,8 +16,8 @@ function updateGlobalStreak($userId, $date = null) {
     $conn = $database->getConnection();
     
     try {
-        // Get all user's habits
-        $habitsQuery = "SELECT id FROM habits WHERE user_id = ?";
+        // Get all user's habits with their creation dates
+        $habitsQuery = "SELECT id, created_at FROM habits WHERE user_id = ?";
         $habitsStmt = $conn->prepare($habitsQuery);
         $habitsStmt->execute([$userId]);
         $habits = $habitsStmt->fetchAll(PDO::FETCH_ASSOC);
@@ -32,18 +32,38 @@ function updateGlobalStreak($userId, $date = null) {
             return ['current_streak' => 0, 'best_streak' => 0];
         }
         
-        $habitIds = array_column($habits, 'id');
-        $placeholders = str_repeat('?,', count($habitIds) - 1) . '?';
+        // Filter habits that existed on the given date
+        $existingHabits = [];
+        $dateTimestamp = strtotime($date . ' 23:59:59'); // End of day
         
-        // Check if ALL habits are completed for the given date
+        foreach ($habits as $habit) {
+            $habitCreatedTimestamp = strtotime($habit['created_at']);
+            if ($habitCreatedTimestamp <= $dateTimestamp) {
+                $existingHabits[] = $habit['id'];
+            }
+        }
+        
+        if (empty($existingHabits)) {
+            // No habits existed on this date, maintain current streak at 0
+            $updateQuery = "INSERT INTO user_streaks (user_id, current_streak, best_streak) 
+                           VALUES (?, 0, 0) 
+                           ON DUPLICATE KEY UPDATE current_streak = 0";
+            $updateStmt = $conn->prepare($updateQuery);
+            $updateStmt->execute([$userId]);
+            return ['current_streak' => 0, 'best_streak' => 0];
+        }
+        
+        $placeholders = str_repeat('?,', count($existingHabits) - 1) . '?';
+        
+        // Check if ALL habits that existed on this date are completed
         $completionQuery = "SELECT COUNT(DISTINCT habit_id) as completed_count 
                            FROM habit_completions 
                            WHERE habit_id IN ($placeholders) AND completion_date = ?";
         $completionStmt = $conn->prepare($completionQuery);
-        $completionStmt->execute(array_merge($habitIds, [$date]));
+        $completionStmt->execute(array_merge($existingHabits, [$date]));
         $result = $completionStmt->fetch(PDO::FETCH_ASSOC);
         
-        $allHabitsCompleted = ($result['completed_count'] == count($habits));
+        $allHabitsCompleted = ($result['completed_count'] == count($existingHabits));
         
         // Debug logging (commented out to prevent JSON issues)
         // error_log("Global streak debug - Date: $date, Total habits: " . count($habits) . ", Completed: " . $result['completed_count'] . ", All completed: " . ($allHabitsCompleted ? 'YES' : 'NO'));

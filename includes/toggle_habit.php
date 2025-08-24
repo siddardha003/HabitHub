@@ -97,8 +97,24 @@ try {
                              ON DUPLICATE KEY UPDATE 
                              streak = VALUES(streak), 
                              last_completion_date = VALUES(last_completion_date)";
-        $updateStreakStmt = $conn->prepare($updateStreakQuery);
-        $updateStreakStmt->execute([$habitId, $currentStreak, $date]);
+        
+        try {
+            $updateStreakStmt = $conn->prepare($updateStreakQuery);
+            if (!$updateStreakStmt) {
+                throw new Exception("Failed to prepare streak query: " . implode(' ', $conn->errorInfo()));
+            }
+            
+            // Debug: Log the query and parameters
+            error_log("Executing streak update query: " . $updateStreakQuery);
+            error_log("Parameters: habitId=$habitId, currentStreak=$currentStreak, date=$date");
+            
+            if (!$updateStreakStmt->execute([$habitId, $currentStreak, $date])) {
+                throw new Exception("Failed to execute streak query: " . implode(' ', $updateStreakStmt->errorInfo()));
+            }
+        } catch (Exception $streakError) {
+            error_log("Streak update error: " . $streakError->getMessage());
+            throw $streakError;
+        }
         
         // Update global streak
         try {

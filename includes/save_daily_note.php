@@ -9,15 +9,12 @@ if (!isset($_SESSION['user_id'])) {
 }
 
 // Database connection
-$host = 'localhost';
-$dbname = 'habithub';
-$username = 'root';
-$password = '';
+require_once '../config/database.php';
 
 try {
-    $pdo = new PDO("mysql:host=$host;dbname=$dbname", $username, $password);
-    $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-} catch (PDOException $e) {
+    $database = new Database();
+    $pdo = $database->getConnection();
+} catch (Exception $e) {
     echo json_encode(['success' => false, 'message' => 'Database connection failed']);
     exit;
 }
@@ -51,12 +48,12 @@ try {
             CREATE TABLE daily_notes (
                 id INT AUTO_INCREMENT PRIMARY KEY,
                 user_id INT NOT NULL,
-                date DATE NOT NULL,
-                note_content TEXT,
+                note_date DATE NOT NULL,
+                content TEXT,
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                 updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
                 FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
-                UNIQUE KEY unique_daily_note (user_id, date)
+                UNIQUE KEY unique_daily_note (user_id, note_date)
             )
         ";
         $pdo->exec($createTableSQL);
@@ -64,17 +61,17 @@ try {
     
     if (empty($noteContent)) {
         // Delete note if content is empty
-        $deleteStmt = $pdo->prepare("DELETE FROM daily_notes WHERE user_id = ? AND date = ?");
+        $deleteStmt = $pdo->prepare("DELETE FROM daily_notes WHERE user_id = ? AND note_date = ?");
         $deleteStmt->execute([$userId, $date]);
         
         echo json_encode(['success' => true, 'message' => 'Note deleted successfully']);
     } else {
         // Insert or update note
         $upsertStmt = $pdo->prepare("
-            INSERT INTO daily_notes (user_id, date, note_content) 
+            INSERT INTO daily_notes (user_id, note_date, content) 
             VALUES (?, ?, ?)
             ON DUPLICATE KEY UPDATE 
-            note_content = VALUES(note_content),
+            content = VALUES(content),
             updated_at = CURRENT_TIMESTAMP
         ");
         $upsertStmt->execute([$userId, $date, $noteContent]);
@@ -84,6 +81,11 @@ try {
     
 } catch (PDOException $e) {
     error_log("Save daily note error: " . $e->getMessage());
-    echo json_encode(['success' => false, 'message' => 'Database error occurred']);
+    echo json_encode([
+        'success' => false, 
+        'message' => 'Database error occurred',
+        'debug' => $e->getMessage(),
+        'error_code' => $e->getCode()
+    ]);
 }
 ?>

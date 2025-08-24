@@ -51,11 +51,17 @@ try {
     $userId = $_SESSION['user_id'];
     
     // Get current week boundaries (Sunday to Saturday)
-    $query = "SELECT h.*, 
+    // Calculate the start of current week (Sunday)
+    $today = date('Y-m-d');
+    $dayOfWeek = date('w'); // 0 = Sunday, 1 = Monday, etc.
+    $weekStart = date('Y-m-d', strtotime($today . ' -' . $dayOfWeek . ' days'));
+    $weekEnd = date('Y-m-d', strtotime($weekStart . ' +6 days'));
+    
+    $query = "SELECT h.id, h.user_id, h.name, h.category, h.icon, h.created_at, h.updated_at,
               (SELECT COUNT(*) FROM habit_completions hc 
                WHERE hc.habit_id = h.id 
-               AND hc.completion_date >= DATE_SUB(CURDATE(), INTERVAL WEEKDAY(CURDATE()) + 1 DAY)
-               AND hc.completion_date <= DATE_ADD(DATE_SUB(CURDATE(), INTERVAL WEEKDAY(CURDATE()) + 1 DAY), INTERVAL 6 DAY)) as completed_days
+               AND hc.completion_date >= ? 
+               AND hc.completion_date <= ?) as completed_days
               FROM habits h 
               WHERE h.user_id = ?";
               
@@ -64,7 +70,7 @@ try {
         throw new Exception('Prepare failed: ' . implode(' ', $conn->errorInfo()));
     }
     
-    if (!$stmt->execute([$userId])) {
+    if (!$stmt->execute([$weekStart, $weekEnd, $userId])) {
         throw new Exception('Execute failed: ' . implode(' ', $stmt->errorInfo()));
     }
     
@@ -74,10 +80,10 @@ try {
         $weekProgressQuery = "SELECT DATE_FORMAT(completion_date, '%w') as day_of_week 
                             FROM habit_completions 
                             WHERE habit_id = ? 
-                            AND completion_date >= DATE_SUB(CURDATE(), INTERVAL WEEKDAY(CURDATE()) + 1 DAY)
-                            AND completion_date <= DATE_ADD(DATE_SUB(CURDATE(), INTERVAL WEEKDAY(CURDATE()) + 1 DAY), INTERVAL 6 DAY)";
+                            AND completion_date >= ? 
+                            AND completion_date <= ?";
         $weekStmt = $conn->prepare($weekProgressQuery);
-        $weekStmt->execute([$row['id']]);
+        $weekStmt->execute([$row['id'], $weekStart, $weekEnd]);
         
         $weekProgress = array_fill(0, 7, false);
         while ($day = $weekStmt->fetch(PDO::FETCH_ASSOC)) {
@@ -150,7 +156,8 @@ try {
             'icon' => $row['icon'],
             'currentStreak' => $currentStreak,
             'weekProgress' => $weekProgress,
-            'completedDays' => (int)$row['completed_days']
+            'completedDays' => (int)$row['completed_days'],
+            'created_at' => $row['created_at']
         ];
     }
     
