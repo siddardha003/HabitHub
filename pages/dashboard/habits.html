@@ -59,7 +59,7 @@
       <button class="mobile-menu-toggle" onclick="toggleSidebar()">
         <i class="fas fa-bars"></i>
       </button>
-      
+
       <!-- Header -->
       <div class="dashboard-header">
         <div class="greeting-section">
@@ -68,9 +68,9 @@
         </div>
         <div class="header-icons">
           <i class="fas fa-bell" title="Notifications"></i>
-          <div class="profile-icon" title="Profile">
+          <a class="profile-icon" title="Profile" href="profile.html">
             A
-          </div>
+          </a>
         </div>
       </div>
 
@@ -85,7 +85,8 @@
         </div>
 
         <!-- Add Habit Modal -->
-        <div class="modal fade" id="addHabitModal" tabindex="-1" aria-labelledby="addHabitModalLabel" aria-hidden="true">
+        <div class="modal fade" id="addHabitModal" tabindex="-1" aria-labelledby="addHabitModalLabel"
+          aria-hidden="true">
           <div class="modal-dialog">
             <div class="modal-content">
               <div class="modal-header">
@@ -124,7 +125,8 @@
         </div>
 
         <!-- Edit Habit Modal -->
-        <div class="modal fade" id="editHabitModal" tabindex="-1" aria-labelledby="editHabitModalLabel" aria-hidden="true">
+        <div class="modal fade" id="editHabitModal" tabindex="-1" aria-labelledby="editHabitModalLabel"
+          aria-hidden="true">
           <div class="modal-dialog">
             <div class="modal-content">
               <div class="modal-header">
@@ -163,7 +165,8 @@
         </div>
 
         <!-- Delete Confirmation Modal -->
-        <div class="modal fade" id="deleteHabitModal" tabindex="-1" aria-labelledby="deleteHabitModalLabel" aria-hidden="true">
+        <div class="modal fade" id="deleteHabitModal" tabindex="-1" aria-labelledby="deleteHabitModalLabel"
+          aria-hidden="true">
           <div class="modal-dialog">
             <div class="modal-content">
               <div class="modal-header">
@@ -204,12 +207,12 @@
               </tbody>
             </table>
           </div>
-          
+
           <!-- Mobile Cards View -->
           <div class="habits-mobile-cards" id="habitsMobileCards">
             <!-- Dynamic mobile cards will be rendered here -->
           </div>
-          
+
           <!-- Empty State -->
           <div class="empty-state" id="emptyState" style="display: none;">
             <div class="empty-state-content">

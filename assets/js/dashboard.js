@@ -1,25 +1,9 @@
+console.log('Dashboard.js loaded - version without visit tracking');
+
 // Habits data
 let habits = [];
 
-// Track daily visits (server-side)
-async function trackDailyVisit() {
-    try {
-        const response = await fetch('../../includes/track_visit.php', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            }
-        });
-        
-        const data = await response.json();
-        if (!data.success) {
-            console.warn('Failed to track visit:', data.message);
-        }
-    } catch (error) {
-        console.warn('Visit tracking error:', error);
-        // Fail silently - visit tracking shouldn't break the app
-    }
-}
+// Visit tracking removed - using user_login_days table instead
 
 // Category icons and colors mapping
 const categoryIcons = {
@@ -304,7 +288,6 @@ function getNextAchievement(currentStreak) {
     return null; // No next achievement (reached maximum)
 }
 
-
 // Update streak
 function updateStreak(habit) {
     const today = new Date().getDay();
@@ -396,17 +379,6 @@ function calculateAchievementLevel(streak) {
     }
     return achievementLevels[0];
 }
-
-function getNextAchievement(streak) {
-    // Find the next achievement level that the user hasn't reached yet
-    for (let i = 0; i < achievementLevels.length; i++) {
-        if (streak < achievementLevels[i].days) {
-            return achievementLevels[i];
-        }
-    }
-    return null; // Return null if user has reached the highest level
-}
-
 
 // Update stats dynamically
 async function updateStats() {
@@ -650,7 +622,6 @@ async function fetchHabits() {
 
 // Initialize app
 document.addEventListener('DOMContentLoaded', function () {
-    trackDailyVisit(); // Track that user visited today
     updateGreeting();
     updateDate();
     fetchHabits(); // This now has its own check for dashboard page

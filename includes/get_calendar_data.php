@@ -9,15 +9,12 @@ if (!isset($_SESSION['user_id'])) {
 }
 
 // Database connection
-$host = 'localhost';
-$dbname = 'habithub';
-$username = 'root';
-$password = '';
+require_once '../config/database.php';
 
 try {
-    $pdo = new PDO("mysql:host=$host;dbname=$dbname", $username, $password);
-    $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-} catch (PDOException $e) {
+    $database = new Database();
+    $pdo = $database->getConnection();
+} catch (Exception $e) {
     echo json_encode(['success' => false, 'message' => 'Database connection failed']);
     exit;
 }
@@ -64,17 +61,17 @@ try {
     $notesData = [];
     try {
         $notesStmt = $pdo->prepare("
-            SELECT date, note_content
+            SELECT note_date, content
             FROM daily_notes 
             WHERE user_id = ? 
-            AND date BETWEEN ? AND ?
+            AND note_date BETWEEN ? AND ?
         ");
         $notesStmt->execute([$userId, $startDate, $endDate]);
         $dailyNotes = $notesStmt->fetchAll(PDO::FETCH_ASSOC);
         
         // Format notes data
         foreach ($dailyNotes as $note) {
-            $notesData[$note['date']] = $note['note_content'];
+            $notesData[$note['note_date']] = $note['content'];
         }
     } catch (PDOException $e) {
         // Table might not exist yet, continue without notes
@@ -117,13 +114,21 @@ try {
         
         if (strtotime($date) <= time()) { // Only count past and current days
             $dayCompletions = 0;
-            $dayTotal = count($habits);
+            $dayTotal = 0; // Count only habits that existed on this date
             
             foreach ($habits as $habit) {
-                $habitStats[$habit['id']]['total']++;
-                if (isset($completions[$date][$habit['id']]) && $completions[$date][$habit['id']]) {
-                    $dayCompletions++;
-                    $habitStats[$habit['id']]['completed']++;
+                // Check if habit existed on this date
+                $habitCreatedDate = strtotime($habit['created_at']);
+                $currentDateTimestamp = strtotime($date . ' 23:59:59'); // End of day
+                
+                if ($habitCreatedDate <= $currentDateTimestamp) {
+                    $dayTotal++; // Only count habits that existed on this date
+                    $habitStats[$habit['id']]['total']++;
+                    
+                    if (isset($completions[$date][$habit['id']]) && $completions[$date][$habit['id']]) {
+                        $dayCompletions++;
+                        $habitStats[$habit['id']]['completed']++;
+                    }
                 }
             }
             
@@ -131,6 +136,7 @@ try {
                 $totalCompletions += $dayCompletions;
                 $totalPossible += $dayTotal;
                 
+                // Perfect day: all habits that existed on this date were completed
                 if ($dayCompletions === $dayTotal && $dayTotal > 0) {
                     $perfectDays++;
                 }
@@ -150,29 +156,44 @@ try {
         }
     }
 
-    // Update and get current streak from global streak system
+    // Calculate current streak based on consecutive perfect days
     $currentStreak = 0;
-    try {
-        // First, update the global streak to ensure it's current
-        require_once 'update_global_streak.php';
-        $streakData = updateGlobalStreak($userId);
-        $currentStreak = $streakData['current_streak'];
-    } catch (Exception $e) {
-        error_log("Global streak update failed: " . $e->getMessage());
+    $today = date('Y-m-d');
+    
+    // Start from today and work backwards to find consecutive perfect days
+    for ($i = 0; $i < $daysInMonth; $i++) {
+        $checkDate = date('Y-m-d', strtotime($today . " -$i days"));
         
-        // Fallback: try to get from database
-        try {
-            $streakQuery = "SELECT current_streak FROM user_streaks WHERE user_id = ?";
-            $streakStmt = $pdo->prepare($streakQuery);
-            $streakStmt->execute([$userId]);
-            $streakResult = $streakStmt->fetch(PDO::FETCH_ASSOC);
+        // Only check dates within the current month and not in the future
+        if (strtotime($checkDate) >= strtotime($startDate) && 
+            strtotime($checkDate) <= strtotime($endDate) && 
+            strtotime($checkDate) <= time()) {
             
-            if ($streakResult) {
-                $currentStreak = (int)$streakResult['current_streak'];
+            // Count habits that existed on this date
+            $dayTotal = 0;
+            $dayCompletions = 0;
+            
+            foreach ($habits as $habit) {
+                $habitCreatedDate = strtotime($habit['created_at']);
+                $checkDateTimestamp = strtotime($checkDate . ' 23:59:59');
+                
+                if ($habitCreatedDate <= $checkDateTimestamp) {
+                    $dayTotal++;
+                    if (isset($completions[$checkDate][$habit['id']]) && $completions[$checkDate][$habit['id']]) {
+                        $dayCompletions++;
+                    }
+                }
             }
-        } catch (PDOException $e2) {
-            error_log("Streak fallback query failed: " . $e2->getMessage());
-            $currentStreak = 0;
+            
+            // If it's a perfect day, increment streak
+            if ($dayTotal > 0 && $dayCompletions === $dayTotal) {
+                $currentStreak++;
+            } else {
+                // Break the streak if not a perfect day
+                break;
+            }
+        } else {
+            break;
         }
     }
 
