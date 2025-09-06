@@ -303,9 +303,30 @@
     color: #92400e;
 }
 
+.rate-average {
+    background: #fed7aa;
+    color: #c2410c;
+}
+
+.rate-poor {
+    background: #fecaca;
+    color: #991b1b;
+}
+
 .rate-needs-work {
     background: #fecaca;
     color: #991b1b;
+}
+
+/* No data message */
+.no-data {
+    text-align: center;
+    color: #64748b;
+    font-style: italic;
+    padding: 1rem;
+    background: #f8fafc;
+    border-radius: 8px;
+    border: 1px dashed #cbd5e1;
 }
 
 /* Achievement Items */
