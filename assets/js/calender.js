@@ -863,8 +863,6 @@ async function saveDailyNote() {
     if (!currentNoteDate) return;
 
     const noteContent = document.getElementById('dailyNoteText').value.trim();
-    
-    console.log('Saving daily note:', { date: currentNoteDate, noteContent });
 
     try {
         const response = await fetch('../../includes/save_daily_note.php', {
@@ -878,23 +876,7 @@ async function saveDailyNote() {
             })
         });
 
-        console.log('Response status:', response.status);
-        
-        if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
-        }
-
-        const text = await response.text();
-        console.log('Response text:', text);
-        
-        let data;
-        try {
-            data = JSON.parse(text);
-        } catch (e) {
-            console.error('JSON parse error:', e);
-            console.error('Response text:', text);
-            throw new Error('Invalid JSON response from server');
-        }
+        const data = await response.json();
 
         if (data.success) {
             // Update local data

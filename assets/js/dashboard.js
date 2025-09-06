@@ -1,9 +1,7 @@
-console.log('Dashboard.js loaded - version without visit tracking');
+console.log('Dashboard.js loaded - using existing user_login_days table');
 
 // Habits data
 let habits = [];
-
-// Visit tracking removed - using user_login_days table instead
 
 // Category icons and colors mapping
 const categoryIcons = {
