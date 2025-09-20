@@ -212,9 +212,8 @@ body {
 .achievement-card.earned {
     border: 2px solid #fbbf24;
     box-shadow: 0 0 20px rgba(251, 191, 36, 0.3);
-    background: linear-gradient(135deg, rgba(251, 191, 36, 0.15), rgba(245, 158, 11, 0.1));
+    background: rgba(212, 211, 211, 0.25);
 }
-
 .achievement-card.locked {
     filter: blur(3px);
     opacity: 0.4;
