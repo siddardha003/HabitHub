@@ -16,10 +16,11 @@ async function loadUserProfile() {
         if (data.success) {
             const user = data.user;
             const userName = data.user.name;
+            const userJoinedDate = data.user.created_at;
             
             document.getElementById('profileName').textContent = user.name || 'User';
             document.getElementById('profileEmail').textContent = user.email || '';
-            document.getElementById('joinDate').textContent = 'Member since ' + formatDate(user.created_at);
+            document.getElementById('joinDate').textContent = 'Member since ' + formatDate(userJoinedDate);
 
             document.getElementById('userName').value = user.name || '';
             document.getElementById('userEmail').value = user.email || '';
