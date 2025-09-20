@@ -1,304 +1,56 @@
-// Achievements page functionality with fallback data
+// Achievements page functionality - now loads from database
 document.addEventListener('DOMContentLoaded', function () {
     initializeAchievements();
     setupEventListeners();
 });
 
-// Comprehensive achievement data with all categories
-const achievementsData = {
-    streaks: [
-        {
-            id: 'fire_starter',
-            name: 'Fire Starter',
-            description: 'Complete habits for 3 consecutive days',
-            icon: 'fas fa-fire',
-            rarity: 'common',
-            points: 50,
-            progress: 3,
-            maxProgress: 3,
-            earned: true,
-            earnedDate: '2025-01-10'
-        },
-        {
-            id: 'habit_warrior',
-            name: 'Habit Warrior',
-            description: 'Maintain a 7-day streak',
-            icon: 'fas fa-sword',
-            rarity: 'rare',
-            points: 150,
-            progress: 7,
-            maxProgress: 7,
-            earned: true,
-            earnedDate: '2025-01-14'
-        },
-        {
-            id: 'consistency_king',
-            name: 'Consistency King',
-            description: 'Achieve a 14-day streak',
-            icon: 'fas fa-crown',
-            rarity: 'epic',
-            points: 300,
-            progress: 12,
-            maxProgress: 14,
-            earned: false
-        },
-        {
-            id: 'unstoppable_force',
-            name: 'Unstoppable Force',
-            description: 'Reach a 30-day streak',
-            icon: 'fas fa-rocket',
-            rarity: 'legendary',
-            points: 500,
-            progress: 12,
-            maxProgress: 30,
-            earned: false
-        },
-        {
-            id: 'century_club',
-            name: 'Century Club',
-            description: 'Achieve a 100-day streak',
-            icon: 'fas fa-trophy',
-            rarity: 'legendary',
-            points: 1000,
-            progress: 12,
-            maxProgress: 100,
-            earned: false
-        }
-    ],
-    progress: [
-        {
-            id: 'first_steps',
-            name: 'First Steps',
-            description: 'Complete your first habit',
-            icon: 'fas fa-baby',
-            rarity: 'common',
-            points: 25,
-            progress: 1,
-            maxProgress: 1,
-            earned: true,
-            earnedDate: '2025-01-08'
-        },
-        {
-            id: 'habit_collector',
-            name: 'Habit Collector',
-            description: 'Create 5 different habits',
-            icon: 'fas fa-list',
-            rarity: 'common',
-            points: 75,
-            progress: 5,
-            maxProgress: 5,
-            earned: true,
-            earnedDate: '2025-01-12'
-        },
-        {
-            id: 'century_mark',
-            name: 'Century Mark',
-            description: 'Complete 100 total habit instances',
-            icon: 'fas fa-check-circle',
-            rarity: 'rare',
-            points: 200,
-            progress: 87,
-            maxProgress: 100,
-            earned: false
-        },
-        {
-            id: 'habit_master',
-            name: 'Habit Master',
-            description: 'Complete 500 total habit instances',
-            icon: 'fas fa-star',
-            rarity: 'epic',
-            points: 400,
-            progress: 87,
-            maxProgress: 500,
-            earned: false
-        }
-    ],
-    perfection: [
-        {
-            id: 'perfect_day',
-            name: 'Perfect Day',
-            description: 'Complete all habits in a single day',
-            icon: 'fas fa-sun',
-            rarity: 'rare',
-            points: 100,
-            progress: 1,
-            maxProgress: 1,
-            earned: true,
-            earnedDate: '2025-01-11'
-        },
-        {
-            id: 'perfect_week',
-            name: 'Perfect Week',
-            description: 'Maintain 100% completion for 7 consecutive days',
-            icon: 'fas fa-calendar-week',
-            rarity: 'epic',
-            points: 350,
-            progress: 3,
-            maxProgress: 7,
-            earned: false
-        },
-        {
-            id: 'perfect_month',
-            name: 'Perfect Month',
-            description: 'Achieve 100% completion for an entire month',
-            icon: 'fas fa-medal',
-            rarity: 'legendary',
-            points: 1000,
-            progress: 0,
-            maxProgress: 30,
-            earned: false
-        }
-    ],
-    consistency: [
-        {
-            id: 'weekly_warrior',
-            name: 'Weekly Warrior',
-            description: 'Complete habits for 7 consecutive days',
-            icon: 'fas fa-shield-alt',
-            rarity: 'rare',
-            points: 150,
-            progress: 7,
-            maxProgress: 7,
-            earned: true,
-            earnedDate: '2025-01-14'
-        },
-        {
-            id: 'monthly_master',
-            name: 'Monthly Master',
-            description: 'Stay active for 30 days in a month',
-            icon: 'fas fa-calendar-alt',
-            rarity: 'epic',
-            points: 300,
-            progress: 16,
-            maxProgress: 30,
-            earned: false
-        },
-        {
-            id: 'never_miss',
-            name: 'Never Miss',
-            description: 'Complete habits without missing a day for 60 days',
-            icon: 'fas fa-bullseye',
-            rarity: 'legendary',
-            points: 750,
-            progress: 16,
-            maxProgress: 60,
-            earned: false
-        }
-    ],
-    categories: [
-        {
-            id: 'health_hero',
-            name: 'Health Hero',
-            description: 'Complete 50 health-related habits',
-            icon: 'fas fa-heart',
-            rarity: 'rare',
-            points: 200,
-            progress: 32,
-            maxProgress: 50,
-            earned: false
-        },
-        {
-            id: 'learning_legend',
-            name: 'Learning Legend',
-            description: 'Complete 30 learning habits',
-            icon: 'fas fa-book',
-            rarity: 'epic',
-            points: 250,
-            progress: 18,
-            maxProgress: 30,
-            earned: false
-        },
-        {
-            id: 'fitness_fanatic',
-            name: 'Fitness Fanatic',
-            description: 'Complete 40 fitness habits',
-            icon: 'fas fa-dumbbell',
-            rarity: 'rare',
-            points: 180,
-            progress: 25,
-            maxProgress: 40,
-            earned: false
-        },
-        {
-            id: 'mindful_master',
-            name: 'Mindful Master',
-            description: 'Complete 25 mindfulness habits',
-            icon: 'fas fa-leaf',
-            rarity: 'epic',
-            points: 220,
-            progress: 15,
-            maxProgress: 25,
-            earned: false
-        },
-        {
-            id: 'productivity_pro',
-            name: 'Productivity Pro',
-            description: 'Complete 35 productivity habits',
-            icon: 'fas fa-chart-line',
-            rarity: 'rare',
-            points: 190,
-            progress: 22,
-            maxProgress: 35,
-            earned: false
-        }
-    ]
-};
-
-// Special achievements that don't fit in main categories
-const specialAchievements = [
-    {
-        id: 'early_bird',
-        name: 'Early Bird',
-        description: 'Complete 10 habits before 8 AM',
-        icon: 'fas fa-sun',
-        rarity: 'rare',
-        points: 120,
-        progress: 6,
-        maxProgress: 10,
-        earned: false,
-        category: 'special'
-    },
-    {
-        id: 'night_owl',
-        name: 'Night Owl',
-        description: 'Complete 10 habits after 10 PM',
-        icon: 'fas fa-moon',
-        rarity: 'rare',
-        points: 120,
-        progress: 3,
-        maxProgress: 10,
-        earned: false,
-        category: 'special'
-    },
-    {
-        id: 'weekend_warrior',
-        name: 'Weekend Warrior',
-        description: 'Maintain habits on weekends for 4 consecutive weeks',
-        icon: 'fas fa-calendar-weekend',
-        rarity: 'epic',
-        points: 280,
-        progress: 2,
-        maxProgress: 4,
-        earned: false,
-        category: 'special'
-    }
-];
+// Achievement data will be loaded from backend
+let achievementsData = null;
+let achievementsStats = null;
 
 let currentFilter = 'all';
 let currentCategory = 'all';
 let searchTerm = '';
 
-function initializeAchievements() {
+// Initialize achievements from backend
+async function initializeAchievements() {
+    await loadAchievements();
     calculateAndUpdateStats();
     renderAchievements();
     updateRecentAchievements();
 }
 
+// Load achievements from backend
+async function loadAchievements() {
+    try {
+        const response = await fetch('../../includes/get_achievements.php');
+        const data = await response.json();
+        
+        if (data.success) {
+            achievementsData = data.achievements;
+            achievementsStats = data.stats; // Store the stats from backend
+        } else {
+            console.error('Failed to load achievements:', data.message);
+            achievementsData = {}; // Fallback to empty object
+            achievementsStats = {};
+        }
+    } catch (error) {
+        console.error('Error loading achievements:', error);
+        achievementsData = {}; // Fallback to empty object
+        achievementsStats = {};
+    }
+}
+
 function calculateAndUpdateStats() {
-    const allAchievements = getAllAchievements();
-    const earnedAchievements = allAchievements.filter(a => a.earned);
-    const totalXP = earnedAchievements.reduce((sum, a) => sum + a.points, 0);
-    const totalAchievements = earnedAchievements.length;
+    if (!achievementsData || !achievementsStats) {
+        return; // Don't update if data not loaded yet
+    }
+    
+    // Use stats from backend API
+    const totalAchievements = achievementsStats.total_earned || 0;
+    const totalXP = achievementsStats.total_xp || 0;
+    const currentStreak = achievementsStats.current_streak || 0;
+    const rarestRarity = achievementsStats.rarest_rarity || 'common';
 
     // Calculate level based on XP (every 500 XP = 1 level)
     const level = Math.floor(totalXP / 500) + 1;
@@ -306,27 +58,33 @@ function calculateAndUpdateStats() {
     const nextLevelXP = 500;
     const progressPercent = (currentLevelXP / nextLevelXP) * 100;
 
-    // Find rarest achievement
-    const rarityOrder = { 'common': 1, 'rare': 2, 'epic': 3, 'legendary': 4 };
-    const rarestAchievement = earnedAchievements.reduce((rarest, current) => {
-        return rarityOrder[current.rarity] > rarityOrder[rarest.rarity] ? current : rarest;
-    }, earnedAchievements[0] || { rarity: 'common' });
-
-    // Get current streak (mock data)
-    const currentStreak = 12;
+    // Create rarest achievement object for compatibility
+    const rarestAchievement = { rarity: rarestRarity };
 
     // Update stats in UI
-    document.querySelector('.stats-grid .stat-card:nth-child(1) h3').textContent = totalAchievements;
-    document.querySelector('.stats-grid .stat-card:nth-child(2) h3').textContent = totalXP.toLocaleString();
-    document.querySelector('.stats-grid .stat-card:nth-child(3) h3').textContent = `🔥 ${currentStreak}`;
-    document.querySelector('.stats-grid .stat-card:nth-child(4) h3').textContent = capitalizeFirst(rarestAchievement.rarity);
+    const statCards = document.querySelectorAll('.stats-grid .stat-card');
+    if (statCards.length >= 4) {
+        statCards[0].querySelector('h3').textContent = totalAchievements;
+        statCards[1].querySelector('h3').textContent = totalXP.toLocaleString();
+        statCards[2].querySelector('h3').textContent = getLevelTitle(level);
+        statCards[3].querySelector('h3').textContent = capitalizeFirst(rarestAchievement.rarity);
+    }
 
-    // Update level display
-    document.querySelector('.level-number').textContent = level;
-    document.querySelector('.level-title').textContent = getLevelTitle(level);
-    document.querySelector('.level-info h2').textContent = `Level ${level} - ${getLevelTitle(level)}`;
-    document.querySelector('.progress-fill').style.width = `${progressPercent}%`;
-    document.querySelector('.xp-info').textContent = `${currentLevelXP.toLocaleString()} / ${nextLevelXP.toLocaleString()} XP to next level`;
+    // Update level display elements if they exist
+    const levelNumber = document.querySelector('.level-number');
+    if (levelNumber) levelNumber.textContent = level;
+    
+    const levelTitle = document.querySelector('.level-title');
+    if (levelTitle) levelTitle.textContent = getLevelTitle(level);
+    
+    const levelInfo = document.querySelector('.level-info h2');
+    if (levelInfo) levelInfo.textContent = `Level ${level} - ${getLevelTitle(level)}`;
+    
+    const progressFill = document.querySelector('.progress-fill');
+    if (progressFill) progressFill.style.width = `${progressPercent}%`;
+    
+    const xpInfo = document.querySelector('.xp-info');
+    if (xpInfo) xpInfo.textContent = `${currentLevelXP.toLocaleString()} / ${nextLevelXP.toLocaleString()} XP to next level`;
 }
 
 function getLevelTitle(level) {
@@ -338,23 +96,30 @@ function getLevelTitle(level) {
 }
 
 function getAllAchievements() {
+    if (!achievementsData) {
+        return [];
+    }
+    
     const all = [];
     Object.values(achievementsData).forEach(category => {
         all.push(...category);
     });
-    all.push(...specialAchievements);
     return all;
 }
 
 function getFilteredAchievements() {
     let achievements = getAllAchievements();
 
+    if (!achievementsData) {
+        return [];
+    }
+
     // Filter by category
     if (currentCategory !== 'all') {
         if (achievementsData[currentCategory]) {
             achievements = achievementsData[currentCategory];
-        } else if (currentCategory === 'special') {
-            achievements = specialAchievements;
+        } else {
+            achievements = [];
         }
     }
 
@@ -365,9 +130,9 @@ function getFilteredAchievements() {
                 case 'earned':
                     return achievement.earned;
                 case 'in-progress':
-                    return !achievement.earned && achievement.progress > 0;
+                    return !achievement.earned && achievement.progress > 0 && (achievement.isActive !== false);
                 case 'locked':
-                    return !achievement.earned && achievement.progress === 0;
+                    return achievement.isLocked === true;
                 default:
                     return true;
             }
@@ -399,57 +164,85 @@ function renderAchievements() {
         return;
     }
 
-    grid.innerHTML = achievements.map(achievement => createAchievementCard(achievement)).join('');
+    // Sort achievements to show active ones first
+    const sortedAchievements = achievements.sort((a, b) => {
+        // Priority order: Active > Earned > Locked
+        const getPriority = (achievement) => {
+            if (!achievement.earned && (achievement.isActive !== false) && (achievement.isLocked !== true)) {
+                return 1; // Active achievements (highest priority)
+            } else if (achievement.isLocked) {
+                return 2; // Locked achievements (middle priority)
+            } else {
+                return 3; // Earned achievements (lowest priority)
+            }
+        };
+        
+        const priorityA = getPriority(a);
+        const priorityB = getPriority(b);
+        
+        if (priorityA !== priorityB) {
+            return priorityA - priorityB; // Sort by priority
+        }
+        
+        // If same priority, maintain original order (requirement_value order from backend)
+        return 0;
+    });
+
+    grid.innerHTML = sortedAchievements.map(achievement => createAchievementCard(achievement)).join('');
 }
 
 function createAchievementCard(achievement) {
     const progressPercent = (achievement.progress / achievement.maxProgress) * 100;
     const isEarned = achievement.earned;
-    const isInProgress = !isEarned && achievement.progress > 0;
-    const isLocked = !isEarned && achievement.progress === 0;
+    const isActive = achievement.isActive !== undefined ? achievement.isActive : true; // Default to active if not specified
+    const isLocked = achievement.isLocked !== undefined ? achievement.isLocked : false; // Default to not locked if not specified
+    const isInProgress = !isEarned && achievement.progress > 0 && isActive;
 
     let statusClass = '';
     if (isEarned) statusClass = 'earned';
     else if (isLocked) statusClass = 'locked';
+    else if (isActive) statusClass = 'active';
 
     return `
         <div class="achievement-card ${statusClass}" data-achievement-id="${achievement.id}">
             <div class="achievement-header">
-                <div class="achievement-icon ${achievement.rarity}">
+                <div class="achievement-icon ${achievement.category || 'default'}">
                     <i class="${achievement.icon}"></i>
                 </div>
-                <div class="achievement-info">
-                    <h4>${achievement.name}</h4>
-                    <div class="achievement-rarity ${achievement.rarity}">
-                        ${capitalizeFirst(achievement.rarity)}
+                <div class="achievement-content">
+                    <div class="achievement-info">
+                        <h4>${achievement.name}</h4>
+                        <div class="achievement-rarity ${achievement.rarity}">
+                            ${capitalizeFirst(achievement.rarity)}
+                        </div>
                     </div>
-                    <div class="achievement-points">
-                        <i class="fas fa-star"></i>
-                        ${achievement.points} XP
+                    <div class="achievement-description">
+                        ${achievement.description}
                     </div>
                 </div>
             </div>
-            
-            <div class="achievement-description">
-                ${achievement.description}
+            <div class="achievement-meta">
+                <div class="achievement-points">
+                    <i class="fas fa-star"></i>
+                    ${achievement.points} XP
+                </div>
+                ${!isEarned ? `
+                    <div class="achievement-progress">
+                        <div class="progress-header">
+                            <span class="progress-text">Progress: ${achievement.progress}/${achievement.maxProgress}</span>
+                            <span class="progress-percentage">${Math.round(progressPercent)}%</span>
+                        </div>
+                        <div class="progress-bar">
+                            <div class="progress-bar-fill ${achievement.rarity}" style="width: ${progressPercent}%"></div>
+                        </div>
+                    </div>
+                ` : `
+                    <div class="achievement-date">
+                        <i class="fas fa-calendar"></i>
+                        Earned on ${formatDate(achievement.earnedDate)}
+                    </div>
+                `}
             </div>
-            
-            ${!isEarned ? `
-                <div class="achievement-progress">
-                    <div class="progress-header">
-                        <span class="progress-text">Progress</span>
-                        <span class="progress-percentage">${Math.round(progressPercent)}%</span>
-                    </div>
-                    <div class="progress-bar">
-                        <div class="progress-bar-fill ${achievement.rarity}" style="width: ${progressPercent}%"></div>
-                    </div>
-                </div>
-            ` : `
-                <div class="achievement-date">
-                    <i class="fas fa-calendar"></i>
-                    Earned on ${formatDate(achievement.earnedDate)}
-                </div>
-            `}
             
             ${isEarned ? `
                 <button class="share-btn" onclick="shareAchievement('${achievement.id}')">
@@ -499,13 +292,20 @@ function setupEventListeners() {
 }
 
 function updateRecentAchievements() {
+    const timeline = document.querySelector('.timeline');
+    
+    // Safety check - timeline element might not exist on all pages
+    if (!timeline) {
+        console.log('Timeline element not found - skipping recent achievements update');
+        return;
+    }
+    
     const allAchievements = getAllAchievements();
     const recentEarned = allAchievements
         .filter(a => a.earned)
         .sort((a, b) => new Date(b.earnedDate) - new Date(a.earnedDate))
         .slice(0, 3);
 
-    const timeline = document.querySelector('.timeline');
     timeline.innerHTML = recentEarned.map(achievement => `
         <div class="timeline-item">
             <div class="timeline-icon ${achievement.rarity}">
@@ -646,24 +446,6 @@ function closeAchievementModal() {
     }
 }
 
-function shareAchievement(achievementId) {
-    const achievement = getAllAchievements().find(a => a.id === achievementId);
-    if (!achievement) return;
-
-    if (navigator.share) {
-        navigator.share({
-            title: `I earned the "${achievement.name}" achievement!`,
-            text: `Just unlocked "${achievement.name}" in HabitHub! ${achievement.description}`,
-            url: window.location.href
-        });
-    } else {
-        // Fallback: copy to clipboard
-        const text = `I earned the "${achievement.name}" achievement in HabitHub! ${achievement.description}`;
-        navigator.clipboard.writeText(text).then(() => {
-            showNotification('Achievement details copied to clipboard!');
-        });
-    }
-}
 
 function showNotification(message) {
     const notification = document.createElement('div');
@@ -803,3 +585,216 @@ document.addEventListener('keydown', function (e) {
 
 // Add smooth scrolling for better UX
 document.documentElement.style.scrollBehavior = 'smooth';
+
+// Additional functions for achievement unlocking and celebrations
+
+// Simulate achievement unlock (for demo purposes)
+function unlockAchievement(achievementId) {
+    const achievement = getAllAchievements().find(a => a.id === achievementId);
+    if (!achievement || achievement.earned) return;
+
+    // Mark as earned
+    achievement.earned = true;
+    achievement.progress = achievement.maxProgress;
+    achievement.earnedDate = new Date().toISOString().split('T')[0];
+
+    // Create celebration effect
+    createCelebration();
+
+    // Show achievement unlock notification
+    showAchievementUnlock(achievement);
+
+    // Re-render achievements
+    setTimeout(() => {
+        renderAchievements();
+        calculateAndUpdateStats();
+        updateRecentAchievements();
+    }, 2000);
+}
+
+// Create celebration effect
+function createCelebration() {
+    // Create confetti
+    for (let i = 0; i < 50; i++) {
+        setTimeout(() => {
+            createConfetti();
+        }, i * 50);
+    }
+
+    // Add celebration class to level badge
+    const levelBadge = document.querySelector('.level-badge');
+    if (levelBadge) {
+        levelBadge.classList.add('celebration');
+        setTimeout(() => {
+            levelBadge.classList.remove('celebration');
+        }, 600);
+    }
+}
+
+// Create confetti piece
+function createConfetti() {
+    const confetti = document.createElement('div');
+    confetti.className = 'confetti';
+    confetti.style.cssText = `
+        position: fixed;
+        width: 10px;
+        height: 10px;
+        background: ${getRandomColor()};
+        animation: confetti-fall 3s ease-in-out forwards;
+        pointer-events: none;
+        z-index: 9999;
+    `;
+    confetti.style.left = Math.random() * window.innerWidth + 'px';
+    confetti.style.top = '-10px';
+
+    document.body.appendChild(confetti);
+
+    setTimeout(() => {
+        if (document.body.contains(confetti)) {
+            document.body.removeChild(confetti);
+        }
+    }, 3000);
+}
+
+// Show achievement unlock notification
+function showAchievementUnlock(achievement) {
+    const modal = document.createElement('div');
+    modal.style.cssText = `
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.8);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 2000;
+        animation: fadeIn 0.3s ease;
+    `;
+
+    modal.innerHTML = `
+        <div style="
+            background: white;
+            border-radius: 20px;
+            padding: 3rem;
+            text-align: center;
+            max-width: 400px;
+            animation: slideUp 0.3s ease;
+        ">
+            <div style="
+                width: 100px;
+                height: 100px;
+                background: linear-gradient(135deg, #ffd700, #ffed4e);
+                border-radius: 50%;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-size: 36px;
+                margin: 0 auto 2rem;
+                box-shadow: 0 0 30px rgba(255, 215, 0, 0.4);
+                animation: levelGlow 2s ease-in-out infinite alternate;
+                color: #fff;
+            ">
+                <i class="${achievement.icon}"></i>
+            </div>
+            <h2 style="color: #333; margin-bottom: 1rem; font-size: 24px;">🎉 Achievement Unlocked!</h2>
+            <h3 style="color: var(--mindfulness-color); margin-bottom: 0.5rem;">${achievement.name}</h3>
+            <p style="color: #666; margin-bottom: 1.5rem;">${achievement.description}</p>
+            <p style="color: #ffd700; font-weight: 600; font-size: 18px;">+${achievement.points} XP</p>
+            <button onclick="this.parentElement.parentElement.remove()" style="
+                background: linear-gradient(135deg, #8b5cf6, #3b82f6);
+                color: white;
+                border: none;
+                padding: 0.75rem 2rem;
+                border-radius: 8px;
+                margin-top: 1rem;
+                cursor: pointer;
+                font-weight: 500;
+            ">Awesome!</button>
+        </div>
+    `;
+
+    document.body.appendChild(modal);
+
+    // Auto-close after 5 seconds
+    setTimeout(() => {
+        if (document.body.contains(modal)) {
+            document.body.removeChild(modal);
+        }
+    }, 5000);
+}
+
+// Demo function to unlock achievements (for testing)
+function demoUnlockAchievement() {
+    const unlockedAchievements = getAllAchievements().filter(a => !a.earned);
+    if (unlockedAchievements.length > 0) {
+        const randomAchievement = unlockedAchievements[Math.floor(Math.random() * unlockedAchievements.length)];
+        unlockAchievement(randomAchievement.id);
+    }
+}
+
+// Add additional CSS animations
+const additionalStyles = document.createElement('style');
+additionalStyles.textContent = `
+    @keyframes fadeIn {
+        from { opacity: 0; }
+        to { opacity: 1; }
+    }
+    
+    @keyframes slideUp {
+        from { transform: translateY(50px); opacity: 0; }
+        to { transform: translateY(0); opacity: 1; }
+    }
+    
+    @keyframes confetti-fall {
+        0% {
+            transform: translateY(-10px) rotateZ(0deg);
+            opacity: 1;
+        }
+        100% {
+            transform: translateY(100vh) rotateZ(720deg);
+            opacity: 0;
+        }
+    }
+    
+    @keyframes levelGlow {
+        0% {
+            box-shadow: 0 0 20px rgba(255, 215, 0, 0.4);
+        }
+        100% {
+            box-shadow: 0 0 40px rgba(255, 215, 0, 0.8);
+        }
+    }
+    
+    .celebration {
+        animation: bounce 0.6s ease;
+    }
+    
+    @keyframes bounce {
+        0%, 20%, 60%, 100% {
+            transform: translateY(0);
+        }
+        40% {
+            transform: translateY(-10px);
+        }
+        80% {
+            transform: translateY(-5px);
+        }
+    }
+`;
+document.head.appendChild(additionalStyles);
+
+// Update the DOMContentLoaded event listener to include demo functionality
+document.addEventListener('DOMContentLoaded', function () {
+    initializeAchievements();
+    setupEventListeners();
+    
+    // Demo: Add click handler to level badge for testing achievement unlock
+    const levelBadge = document.querySelector('.level-badge');
+    if (levelBadge) {
+        levelBadge.addEventListener('click', () => {
+            demoUnlockAchievement();
+        });
+    }
+});

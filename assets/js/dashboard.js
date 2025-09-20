@@ -139,6 +139,15 @@ async function toggleHabit(element) {
                 habit.weekProgress[today] = true;
                 habit.completedDays++;
                 habit.currentStreak = data.currentStreak;
+                
+                // Trigger achievement check for habit completion
+                if (typeof AchievementTriggers !== 'undefined') {
+                    AchievementTriggers.habitCompleted(
+                        habitId, 
+                        habit.category, 
+                        new Date().toISOString()
+                    );
+                }
 
                 element.style.transform = 'scale(1.2)';
                 setTimeout(() => {
