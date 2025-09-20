@@ -352,6 +352,15 @@ async function addNewHabitTable() {
       habitsData.push(data.habit);
 
       console.log('Added new habit:', data.habit);
+      
+      // Trigger achievement check for habit creation
+      if (typeof AchievementTriggers !== 'undefined') {
+        AchievementTriggers.habitCreated({
+          habit_id: data.habit.id,
+          category: data.habit.category,
+          name: data.habit.name
+        });
+      }
 
       // Clear form
       nameInput.value = '';
